@@ -1,0 +1,490 @@
+﻿@{ 
+    List<Model.EF.ShoppingCart> ListShoppingCart = Session["ShoppingCart"] as List<Model.EF.ShoppingCart>;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <!-- Mobile Specific Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--<meta property="og:image" content="~/Asset/User/dist/img/fav.png" />-->
+    <!-- Favicon-->
+    <link rel="shortcut icon" href="~/Asset/User/dist/img/fav.png">
+    <!-- Author Meta -->
+    <meta name="author" content="CodePixar">
+    <!-- Meta Description -->
+    <meta name="description" content="">
+    <!-- Meta Keyword -->
+    <meta name="keywords" content="">
+    <!-- meta character set -->
+    <meta charset="UTF-8">
+    <!-- Site Title -->
+    <title>@ViewBag.Title</title>
+    <!--
+        CSS
+        ============================================= -->
+    <link rel="stylesheet" href="~/Asset/User/dist/css/linearicons.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/themify-icons.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/owl.carousel.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/nice-select.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/nouislider.min.css">
+    <link rel="stylesheet" href="~/Asset/User/dist/css/ion.rangeSlider.css" />
+    <link rel="stylesheet" href="~/Asset/User/dist/css/ion.rangeSlider.skinFlat.css" />
+    <link rel="stylesheet" href="~/Asset/User/dist/css/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="~/Asset/User/dist/css/main.css">
+    @RenderSection("head", required: false)
+</head>
+<body>
+    <!-- preloader -->
+    <div class="preloader">
+        <div class="loader">
+            <span class="dot"></span>
+            <div class="dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <!-- /preloader -->
+    <!--Messenger-->
+    <!-- Messenger Plugin chat Code -->
+    <div id="fb-root"></div>
+
+    <!-- Your Plugin chat code -->
+    <div id="fb-customer-chat" class="fb-customerchat">
+    </div>
+
+    <!-- Start Header Area -->
+    <header class="header_area sticky-header">
+        <div class="main_menu">
+            <nav class="navbar navbar-expand-lg navbar-light main_box">
+                <div class="container">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <a class="navbar-brand logo_h" href="@Url.Action("trang-chu", "Main")"><img src="~/Asset/User/dist/img/logo.png" alt=""></a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav menu_nav ml-auto">
+                            <li class="nav-item"><a class="nav-link" href="@Url.Action("trang-chu", "Main")">Trang chủ</a></li>
+                            <li class="nav-item">
+                                <a href="@Url.Action("danh-sach-san-pham", "Product")" class="nav-link" role="button">Sản phẩm</a>
+                            </li>
+                            @if (Session["CustomerCurrent"] == null)
+                            {
+                                <li class="nav-item submenu dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                                       aria-expanded="false">Tài khoản</a>
+                                    <ul class="dropdown-menu">
+                                        <li class="nav-item"><a class="nav-link" href="@Url.Action("dang-nhap", "UserAccount")">Đăng nhập</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="@Url.Action("dang-ky", "UserAccount")">Đăng ký</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item submenu dropdown">
+                                    <a id="hello-username" href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Xin chào @(((Session["CustomerCurrent"] as Model.EF.UserAccount).FirstName + " " + (Session["CustomerCurrent"] as Model.EF.UserAccount).LastName).Trim())!</a>
+                                    <ul class="dropdown-menu">
+                                        <li class="nav-item"><a class="nav-link" href="@Url.Action("thong-tin-ca-nhan", "UserAccount")">Thông tin cá nhân</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="@Url.Action("dang-xuat", "UserAccount")">Đăng xuất</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            <li class="nav-item"><a class="nav-link" href="@Url.Action("thong-tin-lien-he", "Contact")">Liên hệ</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="nav-item">@{ Html.RenderAction("ShoppingCartPartial", "ShoppingCart");}</li>
+                            <li class="nav-item">
+                                <button class="search"><span class="lnr lnr-magnifier" id="search"></span></button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="search_input" id="search_input_box">
+            <div class="container">
+                <form id="form-search" autocomplete="off" class="d-flex justify-content-between" method="get">
+                    <div class="autocomplete" style="width: 100%">
+                        <input type="text" class="form-control" id="search_input" placeholder="Tìm kiếm sản phẩm">
+                    </div>
+                    <button id="submit-search" type="submit" class="btn"></button>
+                    <span class="lnr lnr-cross" id="close_search" title="Close Search"></span>
+                </form>
+            </div>
+        </div>
+    </header>
+    <!--Put this script here to remove error $ is not define-->
+    <script src="~/Asset/User/dist/js/vendor/jquery-2.2.4.min.js"></script>
+    @RenderBody()
+    <!--================Cart Area =================-->
+    <div class="modal fade" id="modal-lg">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Giỏ hàng <span class="ti-bag"></span></h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="table-content" class="cart_inner">
+                        @if (ListShoppingCart?.Count() > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Sản phẩm</th>
+                                            <th scope="col">Giá</th>
+                                            <th scope="col">Số lượng</th>
+                                            <th scope="col">T.tiền</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in ListShoppingCart)
+                                        {
+                                            <tr id="row-@item.ProductID-@item.SizeID-@item.ColorID">
+                                                <td>
+                                                    <div class="media">
+                                                        <div class="d-flex">
+                                                            <img width="50" height="50" src="@(item.Stock.Product.ProductPhotoes == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.Stock.Product.ProductPhotoes.FirstOrDefault().Photo))" alt="">
+                                                        </div>
+                                                        <div class="media-body">
+                                                            <p>@((item.Stock.Product.ProductName + " " + item.Stock.Size.SizeName + " " + item.Stock.Color.ColorName).Trim())</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <h5>@String.Format("{0:0,0}", ((double)item.Stock.Product.UnitSellPrice) * (1 - item.Stock.Product.DiscountPercent / 100))</h5>
+                                                </td>
+                                                <td>
+                                                    <div class="product_count">
+                                                        <input name="input-quantity" id="quantity-in-shopping-cart-@item.ProductID-@item.SizeID-@item.ColorID" type="number" value="@item.Quantity" min="1" max="@item.Stock.Quantity" class="input-text qty form-control" onkeydown="return false;" onchange="UpdateShoppingCart('@item.ProductID', '@item.SizeID', '@item.ColorID')">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <h5 id="payment-@item.ProductID-@item.SizeID-@item.ColorID">@String.Format("{0:0,0}", ((double)item.Stock.Product.UnitSellPrice) * (1 - item.Stock.Product.DiscountPercent / 100) * item.Quantity)</h5>
+                                                </td>
+                                                <td>
+                                                    <a name="a-remove" class="gray_btn" href="#!" onclick="RemoveProductInShoppingCart('@item.ProductID', '@item.SizeID', '@item.ColorID')">Xóa</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td>
+                                            </td>
+                                            <td>
+                                            </td>
+                                            <td>
+                                                <h5>Tổng tiền</h5>
+                                            </td>
+                                            <td>
+                                                <h5 id="totalPayment">@String.Format("{0:0,0}", ListShoppingCart.Sum(x => ((double)x.Stock.Product.UnitSellPrice) * (1 - x.Stock.Product.DiscountPercent / 100) * x.Quantity))</h5>
+                                            </td>
+                                            <td>
+                                            </td>
+                                        </tr>
+                                        <tr class="out_button_area">
+                                            <td>
+                                            </td>
+                                            <td>
+                                            </td>
+                                            <td>
+                                            </td>
+                                            <td>
+                                            </td>
+                                            <td>
+                                                <div class="checkout_btn_inner d-flex align-items-center float-right">
+                                                    <a class="gray_btn" onclick="ContinueShopping()" href="#!">Tiếp tục mua hàng</a>
+                                                    <a class="primary-btn" href="@Url.Action("thanh-toan-don-hang", "ShoppingCart")">Thanh toán</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <label>Hiện chưa có sản phẩm nào trong giỏ hàng của bạn.</label>
+                            <a class="gray_btn" onclick="ContinueShopping()" href="#!">Tiếp tục mua hàng</a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--================End Cart Area =================-->
+    <footer class="footer-area section_gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4  col-md-6 col-sm-6">
+                    <div class="single-footer-widget">
+                        <h6>Về chúng tôi</h6>
+                        <p>
+                            Mang những đôi giày với sáng tạo độc đáo điên rồ thật tuyệt ! Bạn sẽ cảm thấy mình tự do, phóng khoáng mà không trở nên quá ngu ngốc. Nhưng cũng với những thứ điên rồ ấy, nếu nó ở quá gần khuôn mặt bạn thì lại khác, thật kỳ quặc !
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-5  col-md-6 col-sm-6">
+                    <div class="single-footer-widget">
+                        <h6>Bản tin</h6>
+                        <p>Cập nhật thông tin mới nhất của chúng tôi</p>
+                        <div class="" id="mc_embed_signup">
+                            <form class="form-inline">
+                                <div class="d-flex flex-row">
+                                    <input class="form-control" name="EMAIL" placeholder="Nhập email" required type="email">
+                                    <button class="click-btn btn btn-default"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></button>
+                                    <div style="position: absolute; left: -5000px;">
+                                        <input name="b_36c4fd991d266f23781ded980_aefe40901a" tabindex="-1" value="" type="text">
+                                    </div>
+                                </div>
+                                <div class="info"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="single-footer-widget">
+                        <h6>Theo dõi chúng tôi</h6>
+                        <p>Mạng xã hội</p>
+                        <div class="footer-social d-flex align-items-center">
+                            <a href="@((Session["contact"] as Model.EF.Contact).FacebookLink == null ? "#!" : (Session["contact"] as Model.EF.Contact).FacebookLink)" target="_blank"><i class="fa fa-facebook"></i></a>
+                            <a href="@((Session["contact"] as Model.EF.Contact).InstagramLink == null ? "#!" : (Session["contact"] as Model.EF.Contact).InstagramLink)" target="_blank"><i class="fa fa-instagram"></i></a>
+                            <a href="@((Session["contact"] as Model.EF.Contact).TwitterLink == null ? "#!" : (Session["contact"] as Model.EF.Contact).TwitterLink)" target="_blank"><i class="fa fa-twitter"></i></a>
+                            <a href="#!" target="_blank"><i class="fa fa-behance"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom d-flex justify-content-center align-items-center flex-wrap">
+                <p class="footer-text m-0">
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                    Copyright &copy;
+                    <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://www.facebook.com/kunn.ngoc.5/" target="_blank">Phạm Hùng</a>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                </p>
+            </div>
+        </div>
+    </footer>
+    <!-- End footer Area -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+            crossorigin="anonymous"></script>
+    <script src="~/Asset/User/dist/js/vendor/bootstrap.min.js"></script>
+    <script src="~/Asset/User/dist/js/jquery.nice-select.min.js"></script>
+    <script src="~/Asset/User/dist/js/jquery.sticky.js"></script>
+    <script src="~/Asset/User/dist/js/nouislider.min.js"></script>
+    <script src="~/Asset/User/dist/js/jquery.magnific-popup.min.js"></script>
+    <script src="~/Asset/User/dist/js/owl.carousel.min.js"></script>
+    <script src="~/Asset/User/dist/js/main.js"></script>
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $('a[href="' + this.location.pathname + '"]').parents('li,ul').addClass('active');
+    </script>
+
+    <script>
+    function ContinueShopping() {
+        $("#modal-lg").modal("hide");
+    }
+    function RemoveProductInShoppingCart(productid, sizeid, colorid) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("xoa-san-pham", "ShoppingCart")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    document.getElementById("row-" + productid + "-" + sizeid + "-" + colorid).remove();
+                    document.getElementById("shopping-cart").innerHTML = document.getElementById("shopping-cart").innerHTML.slice(0, -3) + "(" + result.totalQuantityProductCategory + ")";
+                    if (result.totalQuantityProductCategory <= 0) {
+                        document.getElementById("table-content").innerHTML = '<label>Hiện chưa có sản phẩm nào trong giỏ hàng của bạn.</label><a class="gray_btn" onclick = "ContinueShopping()" href = "#!"> Tiếp tục mua hàng</a>';
+                    }
+                    else {
+                        document.getElementById("totalPayment").innerText = result.totalPayment.toLocaleString().replaceAll('.',',');
+                    }
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    function UpdateShoppingCart(productid, sizeid, colorid) {
+        var quantity = document.getElementById("quantity-in-shopping-cart-" + productid + "-" + sizeid + "-" + colorid).value;
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("cap-nhat-gio-hang", "ShoppingCart")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid, quantity: quantity }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    document.getElementById("totalPayment").innerText = result.totalPayment.toLocaleString().replaceAll('.', ',');
+                    document.getElementById("payment-" + productid + "-" + sizeid + "-" + colorid).innerText = result.payment.toLocaleString().replaceAll('.', ',');
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    </script>
+
+    <script>
+    function autocomplete(inp, arr) {
+        /*the autocomplete function takes two arguments,
+        the text field element and an array of possible autocompleted values:*/
+        var currentFocus;
+        /*execute a function when someone writes in the text field:*/
+        inp.addEventListener("input", function (e) {
+            var a, b, i, val = this.value;
+            /*close any already open lists of autocompleted values*/
+            closeAllLists();
+            if (!val) { return false; }
+            currentFocus = -1;
+            /*create a DIV element that will contain the items (values):*/
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items text-left");
+            /*append the DIV element as a child of the autocomplete container:*/
+            this.parentNode.appendChild(a);
+            /*for each item in the array...*/
+            for (i = 0; i < arr.length; i++) {
+                /*check if the item starts with the same letters as the text field value:*/
+                var index = arr[i].ProductName.toLowerCase().indexOf(val.toLowerCase());
+                if (index !== -1) {
+                    /*create a DIV element for each matching element:*/
+                    b = document.createElement("DIV");
+                    /*make the matching letters bold:*/
+                    b.innerHTML = '<img class="img-fluid mr-4" width="40" height="40" src="data:image/png;base64, ' + arr[i].Photo + '">';
+                    b.innerHTML += arr[i].ProductName;
+                    /*insert a input field that will hold the current array item's value:*/
+                    b.innerHTML += "<input type='hidden' value='" + arr[i].ProductName + "'>";
+                    /*execute a function when someone clicks on the item value (DIV element):*/
+                    b.addEventListener("click", function (e) {
+                        /*insert the value for the autocomplete text field:*/
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        /*close the list of autocompleted values,
+                        (or any other open lists of autocompleted values:*/
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        });
+        /*execute a function presses a key on the keyboard:*/
+        inp.addEventListener("keydown", function (e) {
+            var x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) {
+                /*If the arrow DOWN key is pressed,
+                increase the currentFocus variable:*/
+                currentFocus++;
+                /*and and make the current item more visible:*/
+                addActive(x);
+            } else if (e.keyCode == 38) { //up
+                /*If the arrow UP key is pressed,
+                decrease the currentFocus variable:*/
+                currentFocus--;
+                /*and and make the current item more visible:*/
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    /*and simulate a click on the "active" item:*/
+                    if (x) {
+                        x[currentFocus].click();
+                        currentFocus = -1;
+                    }
+                }
+                else {
+                    var keyword = document.getElementById("search_input").value;
+                    document.getElementById("form-search").action = "/san-pham/tim-kiem-san-pham/" + keyword.replaceAll(' ','-') + "/"; //404 dot problem in the last section can be solved by closing that section with a trailing slash
+                    $("#form-search").unbind('submit').submit();
+                }
+            }
+        });
+        function addActive(x) {
+            /*a function to classify an item as "active":*/
+            if (!x) return false;
+            /*start by removing the "active" class on all items:*/
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            /*add class "autocomplete-active":*/
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+        function removeActive(x) {
+            /*a function to remove the "active" class from all autocomplete items:*/
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+        function closeAllLists(elmnt) {
+            /*close all autocomplete lists in the document,
+            except the one passed as an argument:*/
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+        /*execute a function when someone clicks in the document:*/
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    /*An array containing all the country names in the world:*/
+    var products = @Html.Raw(Json.Encode(Session["ListProduct"]));
+    /*initiate the autocomplete function on the "myInput" element, and pass along the products array as possible autocomplete values:*/
+    autocomplete(document.getElementById("search_input"), products);
+    </script>
+
+    <script>
+        var chatbox = document.getElementById('fb-customer-chat');
+        chatbox.setAttribute("page_id", "101042465993632");
+        chatbox.setAttribute("attribution", "biz_inbox");
+    </script>
+
+    <!-- Your SDK code -->
+    <script>
+        window.fbAsyncInit = function () {
+            FB.init({
+                xfbml: true,
+                version: 'v14.0'
+            });
+        };
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/vi_VN/sdk/xfbml.customerchat.js';
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+</body>
+</html>

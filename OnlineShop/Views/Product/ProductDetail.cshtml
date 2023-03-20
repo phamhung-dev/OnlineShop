@@ -1,0 +1,426 @@
+﻿@model Model.EF.Product
+@{
+    ViewBag.Title = Model.ProductName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>@Model.ProductName</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Sản phẩm<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Chi tiết sản phẩm</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Single Product Area =================-->
+<div class="product_image_area">
+    <div class="container">
+        <div class="row s_product_inner">
+            <div class="col-lg-6">
+                <div class="s_Product_carousel">
+                    @foreach (var item in Model.ProductPhotoes)
+                    {
+                        <div class="single-prd-item">
+                            <img class="img-fluid" src="data:image/png;base64, @Convert.ToBase64String(item.Photo)" alt="">
+                        </div>
+                    }
+                    @if (Model.ProductPhotoes.Count() < 2)
+                    {
+                        <div class="single-prd-item">
+                            <img class="img-fluid" src="data:image/png;base64, @Convert.ToBase64String(Model.ProductPhotoes.FirstOrDefault().Photo)" alt="">
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5 offset-lg-1">
+                <div class="s_product_text">
+                    <h3 style="font-weight: 600">@Model.ProductName</h3>
+                    <div class="row ml-0">
+                        <h2 class="mr-4">@String.Format("{0:0,0}", ((double)Model.UnitSellPrice) * (1 - Model.DiscountPercent / 100))</h2>
+                        @if (Model.DiscountPercent != 0)
+                        {
+                            <s>@String.Format("{0:0,0}", Model.UnitSellPrice)</s>
+                        }
+                    </div>
+                    <ul class="list">
+                        <li><label><span>Loại</span> : @Model.ProductCategory.ProductCategoryName</label></li>
+                        <li><label><span>Tình trạng</span> : <a class="active">@(Model.Status == false ? "Ngừng kinh doanh" : Model.Stocks.Sum(x => x.Quantity) <= 0 ? "Hết hàng" : "Còn hàng")</a></label></li>
+                    </ul>
+                    @if (Model.Status != false && Model.Stocks.Sum(x => x.Quantity) > 0)
+                    {
+                        <div class="product_count mb-2 mt-2">
+                            <label>
+                                <span>Số lượng</span> : <input id="quantity" type="number" value="1" min="1" class="ml-3 input-text qty form-control" onkeydown="return false;">
+                            </label>
+                        </div>
+                        <div>
+                            <label>Chọn size: </label>
+                            <div class="col-md-12 form-group p_star">
+                                <select id="sizeid" class="country_select" onchange="DisplayQuantityInStock('@Model.ProductID')">
+                                    @foreach (var item in Model.Stocks.Where(x => x.Quantity > 0).Select(x => x.Size).Distinct())
+                                    {
+                                        <option value="@item.SizeID">@item.SizeName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Chọn màu: </label>
+                            <div class="col-md-12 form-group p_star">
+                                <select id="colorid" class="country_select" onchange="DisplayQuantityInStock('@Model.ProductID')">
+                                    @foreach (var item in Model.Stocks.Where(x => x.Quantity > 0).Select(x => x.Color).Distinct())
+                                    {
+                                        <option value="@item.ColorID">@item.ColorName</option>
+                                    }
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card_area d-flex align-items-center">
+                            <a class="primary-btn text-white" onclick="AddToShoppingCart('@Model.ProductID')">Đặt hàng</a>
+                            <a class="icon_btn" href="#!" style="@(Model.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")" onclick="@(Model.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ Model.ProductID +"')" : "FavouriteProduct('"+ Model.ProductID +"')")"><i class="lnr lnr lnr-heart"></i></a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-3 card_area d-flex align-items-center">
+                            <a style="cursor: not-allowed;" class="primary-btn text-white">Đặt hàng</a>
+                            <a class="icon_btn" href="#!" style="@(Model.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")" onclick="@(Model.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ Model.ProductID +"')" : "FavouriteProduct('"+ Model.ProductID +"')")"><i class="lnr lnr lnr-heart"></i></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--================End Single Product Area =================-->
+<!--================Product Description Area =================-->
+<section class="product_description_area">
+    <div class="container">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Mô tả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+                   aria-selected="false">Sản phẩm</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
+                   aria-selected="false">Đánh giá</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <p>
+                    @(Model.Description == null ? "Hiện chưa có mô tả cho sản phẩm này." : Model.Description)
+                </p>
+            </div>
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <h5>Nhà cung cấp</h5>
+                                </td>
+                                <td>
+                                    <h5>@Model.Supplier.SupplierName</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h5>Giới tính</h5>
+                                </td>
+                                <td>
+                                    <h5>@(Model.Gender == true ? "Nam" : "Nữ")</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h5>Độ tuổi</h5>
+                                </td>
+                                <td>
+                                    <h5>@Model.Age.AgeName</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h5>Bảo hành</h5>
+                                </td>
+                                <td>
+                                    <h5>@Model.Warranty tháng</h5>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row total_rate">
+                            <div class="col-6">
+                                <div class="box_total">
+                                    <h5>Điểm</h5>
+                                    <h4>@Model.ScoreRating</h4>
+                                    <h6>(@Model.Evaluations.Count() lượt đánh giá)</h6>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="rating_list">
+                                    <h3>Dựa trên (@Model.Evaluations.Count() lượt đánh giá)</h3>
+                                    <ul class="list">
+                                        <li>
+                                            <a href="#!">
+                                                5 sao <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> @Model.Evaluations.Where(x => x.ScoreRating == 5).Count() lượt
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                4 sao <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star" style="color: #e8f0f2;"></i> @Model.Evaluations.Where(x => x.ScoreRating == 4).Count() lượt
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                3 sao <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i> @Model.Evaluations.Where(x => x.ScoreRating == 3).Count() lượt
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                2 sao <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i> @Model.Evaluations.Where(x => x.ScoreRating == 2).Count() lượt
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                1 sao <i class="fa fa-star"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i><i class="fa fa-star" style="color: #e8f0f2;"></i> @Model.Evaluations.Where(x => x.ScoreRating == 1).Count() lượt
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review_list" id="review-list">
+                            @foreach (var item in Model.Feedbacks)
+                            {
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img class="author_img rounded-circle" width="50" height="50" src="@(item.UserAccount.Avatar == null ? "../../Asset/Manager/dist/img/user.png" : "data:image/png;base64, " + Convert.ToBase64String(item.UserAccount.Avatar))" alt="">
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>@((item.UserAccount.FirstName + " " + item.UserAccount.LastName).Trim())</h4>
+                                            <h5>@item.FeedbackDate.ToString("dd-MM-yyyy hh:mm:ss tt")</h5>
+                                            @for (int i = 0; i < Model.Evaluations.FirstOrDefault(x => x.UserID == item.UserID).ScoreRating; i++)
+                                            {
+                                                <i class="fa fa-star"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <p>
+                                        @item.Content
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="review_box">
+                            <h4>Thêm đánh giá của bạn</h4>
+                            @if (Session["CustomerCurrent"] == null)
+                            {
+                                <div class="row justify-content-center align-content-center" style="height: 100px;">
+                                    <a class="primary-btn" href="@Url.Action("dang-nhap", "UserAccount")">Đăng nhập</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>Điểm: </p>
+                                if (Model.Evaluations.FirstOrDefault(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID && x.ProductID == Model.ProductID) == null)
+                                {
+                                    <ul class="list">
+                                        <li><a onclick="Rating('@Model.ProductID', 1)" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        <li><a onclick="Rating('@Model.ProductID', 2)" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        <li><a onclick="Rating('@Model.ProductID', 3)" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        <li><a onclick="Rating('@Model.ProductID', 4)" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        <li><a onclick="Rating('@Model.ProductID', 5)" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <ul class="list">
+                                        @for (int i = 0; i < Model.Evaluations.FirstOrDefault(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID && x.ProductID == Model.ProductID).ScoreRating; i++)
+                                        {
+                                            <li><a onclick="Rating('@Model.ProductID', @(i+1))" href="#!"><i class="fa fa-star"></i></a></li>
+                                        }
+                                        @for (int i = 0; i < 5 - Model.Evaluations.FirstOrDefault(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID && x.ProductID == Model.ProductID).ScoreRating; i++)
+                                        {
+                                            <li><a onclick="Rating('@Model.ProductID', @(Model.Evaluations.FirstOrDefault(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID && x.ProductID == Model.ProductID).ScoreRating + i + 1))" href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        }
+                                    </ul>
+                                }
+                                <div class="row contact_form" id="contactForm" novalidate="novalidate">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="message" id="message" rows="1" placeholder="Nhập nội dung đánh giá"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-right">
+                                        <a class="primary-btn text-white" onclick="WriteFeedback('@Model.ProductID')">Gửi</a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Product Description Area =================-->
+@section scripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    @if (Model.Status != false && Model.Stocks.Sum(x => x.Quantity) > 0)
+    {
+        <script>
+            window.onload = (event) => {
+                DisplayQuantityInStock('@Model.ProductID');
+            };
+        </script>
+    }
+<script>
+    function DisplayQuantityInStock(productid) {
+        var sizeid = document.getElementById("sizeid").value;
+        var colorid = document.getElementById("colorid").value;
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("lay-so-luong-trong-kho", "Stock")",
+            cache: false,
+            data: { productid: productid, sizeid: sizeid, colorid: colorid },
+            success: function (result) {
+                document.getElementById("quantity").max = result;
+            }
+        });
+    }
+    function AddToShoppingCart(productid) {
+        var sizeid = document.getElementById("sizeid").value;
+        var colorid = document.getElementById("colorid").value;
+        var quantity = document.getElementById("quantity").value;
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("them-vao-gio-hang","ShoppingCart")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid, quantity: quantity }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.reload();
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    function UnfavouriteProduct(productid) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("huy-yeu-thich-san-pham","Product")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.reload();
+                }
+                else {
+                    window.location.href = result.url;
+                }
+            }
+        });
+    }
+    function FavouriteProduct(productid) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("yeu-thich-san-pham","Product")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.reload();
+                }
+                else {
+                    window.location.href = result.url;
+                }
+            }
+        });
+    }
+    function Rating(productid, scorerating) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("danh-gia-san-pham","Product")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productid: productid, scorerating: scorerating }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.reload();
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    function WriteFeedback(productid) {
+        var content = document.getElementById("message").value.replace(/^\s+|\s+$/gm, '');
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("viet-phan-hoi","Product")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ content: content, productid: productid }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.reload();
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+</script>
+}

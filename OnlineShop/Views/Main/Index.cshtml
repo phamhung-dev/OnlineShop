@@ -1,0 +1,544 @@
+﻿
+@{
+    ViewBag.Title = "Yolo Shop";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Model.EF.Product> ListFeaturedProduct = ViewBag.ListFeaturedProduct as List<Model.EF.Product>;
+    List<Model.EF.Product> ListNewProduct = ViewBag.ListNewProduct as List<Model.EF.Product>;
+    List<Model.EF.Product> ListDiscountProduct = ViewBag.ListDiscountProduct as List<Model.EF.Product>;
+    List<Model.EF.Slide> ListSlide = ViewBag.ListSlide as List<Model.EF.Slide>;
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<!-- start banner Area -->
+<section class="banner-area">
+    <div class="container">
+        <div class="row fullscreen align-items-center justify-content-start">
+            <div class="col-lg-12">
+                <div class="active-banner-slider owl-carousel">
+                    @foreach (var item in ListSlide)
+                    {
+                        <!-- single-slide -->
+                        <div class="row single-slide align-items-center d-flex">
+                            <div class="col-lg-5 col-md-6">
+                                <div class="banner-content">
+                                    <h1>Nike New <br>Collection!</h1>
+                                    <p>
+                                        Tôi dành phần lớn thời gian của mình khoác lên những thứ bất tiện, vì vậy tôi chỉ nghĩ đến những đôi giầy thể thao.
+                                    </p>
+                                    <div class="add-bag d-flex align-items-center">
+                                        <a class="add-btn" href=""><span class="lnr lnr-cross"></span></a>
+                                        <span class="add-text text-uppercase">Thêm vào giỏ hàng</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="banner-img">
+                                    <img class="img-fluid" src="data:image/png;base64, @Convert.ToBase64String(item.Photo)" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <!-- single-slide -->
+                    <div class="row single-slide">
+                        <div class="col-lg-5">
+                            <div class="banner-content">
+                                <h1>Nike New <br>Collection!</h1>
+                                <p>
+                                    Tôi dành phần lớn thời gian của mình khoác lên những thứ bất tiện, vì vậy tôi chỉ nghĩ đến những đôi giầy thể thao.
+                                </p>
+                                <div class="add-bag d-flex align-items-center">
+                                    <a class="add-btn" href=""><span class="lnr lnr-cross"></span></a>
+                                    <span class="add-text text-uppercase">Thêm vào giỏ hàng</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="banner-img">
+                                <img class="img-fluid" src="~/Asset/User/dist/img/banner/banner-img.png" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End banner Area -->
+<!-- start features Area -->
+<section class="features-area section_gap">
+    <div class="container">
+        <div class="row features-inner">
+            <!-- single features -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-features">
+                    <div class="f-icon">
+                        <img src="~/Asset/User/dist/img/features/f-icon1.png" alt="">
+                    </div>
+                    <h6>Giao hàng miễn phí</h6>
+                    <p>Áp dụng tất cả đơn hàng</p>
+                </div>
+            </div>
+            <!-- single features -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-features">
+                    <div class="f-icon">
+                        <img src="~/Asset/User/dist/img/features/f-icon2.png" alt="">
+                    </div>
+                    <h6>Chính sách đổi trả</h6>
+                    <p>Trong vòng 7 ngày</p>
+                </div>
+            </div>
+            <!-- single features -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-features">
+                    <div class="f-icon">
+                        <img src="~/Asset/User/dist/img/features/f-icon3.png" alt="">
+                    </div>
+                    <h6>Hỗ trợ 24/7</h6>
+                    <p>Xử lý toàn bộ yêu cầu</p>
+                </div>
+            </div>
+            <!-- single features -->
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-features">
+                    <div class="f-icon">
+                        <img src="~/Asset/User/dist/img/features/f-icon4.png" alt="">
+                    </div>
+                    <h6>Thanh toán an toàn</h6>
+                    <p>Bảo mật thông tin khách hàng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end features Area -->
+<!-- Start category Area -->
+<section class="category-area">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-lg-8 col-md-8">
+                        <div class="single-deal">
+                            <div class="overlay"></div>
+                            <img class="img-fluid w-100" src="~/Asset/User/dist/img/category/c1.jpg" alt="">
+                            <a href="~/Asset/User/dist/img/category/c1.jpg" class="img-pop-up" target="_blank">
+                                <div class="deal-details">
+                                    <h6 class="deal-title">Giày Sneaker thể thao</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <div class="single-deal">
+                            <div class="overlay"></div>
+                            <img class="img-fluid w-100" src="~/Asset/User/dist/img/category/c2.jpg" alt="">
+                            <a href="~/Asset/User/dist/img/category/c2.jpg" class="img-pop-up" target="_blank">
+                                <div class="deal-details">
+                                    <h6 class="deal-title">Giày Sneaker thể thao</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <div class="single-deal">
+                            <div class="overlay"></div>
+                            <img class="img-fluid w-100" src="~/Asset/User/dist/img/category/c3.jpg" alt="">
+                            <a href="~/Asset/User/dist/img/category/c3.jpg" class="img-pop-up" target="_blank">
+                                <div class="deal-details">
+                                    <h6 class="deal-title">Giày dành cho cặp đôi</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-8">
+                        <div class="single-deal">
+                            <div class="overlay"></div>
+                            <img class="img-fluid w-100" src="~/Asset/User/dist/img/category/c4.jpg" alt="">
+                            <a href="~/Asset/User/dist/img/category/c4.jpg" class="img-pop-up" target="_blank">
+                                <div class="deal-details">
+                                    <h6 class="deal-title">Giày Sneaker thể thao</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="single-deal">
+                    <div class="overlay"></div>
+                    <img class="img-fluid w-100" src="~/Asset/User/dist/img/category/c5.jpg" alt="">
+                    <a href="~/Asset/User/dist/img/category/c5.jpg" class="img-pop-up" target="_blank">
+                        <div class="deal-details">
+                            <h6 class="deal-title">Giảm giá SỐC</h6>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End category Area -->
+<!-- start product Area -->
+<section class="owl-carousel active-product-area section_gap">
+    <!-- single product slide -->
+    <div class="single-product-slider">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="section-title">
+                        <h1 class="font-weight-bold">Sản phẩm <label class="text-danger">nổi bật</label></h1>
+                        <p>
+                            Người bạn đồng hành hoàn hảo cho đôi chân của bạn.
+                            Bước và tỏa sáng.
+                            Đôi giày sẽ dẫn bạn đến thành công.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var item in ListFeaturedProduct)
+                {
+                    <!-- single product -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="single-product card shadow">
+                            <div class="card-body" style="width: 250px; height: 250px;">
+                                <img class="img-fluid" src="@(item.ProductPhotoes.FirstOrDefault() == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.ProductPhotoes.FirstOrDefault().Photo)) " alt="" style="width: 100%; height: 100%;">
+                                @if (item.DiscountPercent != 0)
+                                {
+                                    <div class="ribbon-wrapper ribbon-lg">
+                                        <div class="ribbon text-lg text-white" style="background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);">
+                                            Giảm @(item.DiscountPercent)%
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="product-details">
+                                    <h6 style="text-transform: none;" class="mb-0">
+                                        @item.ProductName
+                                    </h6>
+                                    <div style="font-size: 16px;" class="review_box">
+                                        <ul class="list pl-0">
+                                            @for (int i = 0; i < (int)item.ScoreRating; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star"></i></a></li>
+                                            }
+                                            @{
+                                                var count = 0;
+                                                var odd = item.ScoreRating - (int)item.ScoreRating;
+                                                if (odd >= 0.8)
+                                                {
+                                                    count = 1;
+                                                    <li><a href="#!"><i class="fa fa-star"></i>@odd</a></li>
+                                                }
+                                                else
+                                                {
+                                                    if (odd >= 0.3)
+                                                    {
+                                                        count = 1;
+                                                        <li style="width: 11px;"><a href="#!"><i class="fa fa-star-half"></i></a></li>
+                                                    }
+                                                }
+                                            }
+                                            @for (int i = 0; i < 5 - item.ScoreRating - count; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="price">
+                                        <h6 style="text-transform: none;">Giá: @String.Format("{0:0,0}", ((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))</h6>
+                                        @if (item.DiscountPercent != 0)
+                                        {
+                                            <h6 class="l-through">@String.Format("{0:0,0}", item.UnitSellPrice)</h6>
+                                        }
+                                    </div>
+                                    <div class="prd-bottom">
+
+                                        <a onclick="AddToShoppingCart('@item.ProductID', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.SizeID)', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.ColorID)')" class="social-info">
+                                            <span class="ti-bag" style="background: #222222;"></span>
+                                            <p class="hover-text">Đặt hàng</p>
+                                        </a>
+                                        <a href="#!" class="social-info" onclick="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ item.ProductID +"')" : "FavouriteProduct('"+ item.ProductID +"')")">
+                                            <span id="favourite-@item.ProductID" class="lnr lnr-heart" style="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")"></span>
+                                            <p class="hover-text">Yêu thích</p>
+                                        </a>
+                                        <a href="@Url.Action("chi-tiet-san-pham","Product", new { id = item.ProductID })" class="social-info">
+                                            <span class="lnr lnr-move" style="background: #222222;"></span>
+                                            <p class="hover-text">Chi tiết</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- single product slide -->
+    <div class="single-product-slider">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="section-title">
+                        <h1 class="font-weight-bold">Sản phẩm <label class="text-danger">mới</label></h1>
+                        <p>
+                            Người bạn đồng hành hoàn hảo cho đôi chân của bạn.
+                            Bước và tỏa sáng.
+                            Đôi giày sẽ dẫn bạn đến thành công.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var item in ListNewProduct)
+                {
+                    <!-- single product -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="single-product card shadow">
+                            <div class="card-body" style="width: 250px; height: 250px;">
+                                <img class="img-fluid" src="@(item.ProductPhotoes.FirstOrDefault() == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.ProductPhotoes.FirstOrDefault().Photo)) " alt="" style="width: 100%; height: 100%;">
+                                @if (item.DiscountPercent != 0)
+                                {
+                                    <div class="ribbon-wrapper ribbon-lg">
+                                        <div class="ribbon text-lg text-white" style="background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);">
+                                            Giảm @(item.DiscountPercent)%
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="product-details">
+                                    <h6 style="text-transform: none;" class="mb-0">
+                                        @item.ProductName
+                                    </h6>
+                                    <div style="font-size: 16px;" class="review_box">
+                                        <ul class="list pl-0">
+                                            @for (int i = 0; i < (int)item.ScoreRating; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star"></i></a></li>
+                                            }
+                                            @{
+                                                var count = 0;
+                                                var odd = item.ScoreRating - (int)item.ScoreRating;
+                                                if (odd >= 0.8)
+                                                {
+                                                    count = 1;
+                                                    <li><a href="#!"><i class="fa fa-star"></i>@odd</a></li>
+                                                }
+                                                else
+                                                {
+                                                    if (odd >= 0.3)
+                                                    {
+                                                        count = 1;
+                                                        <li style="width: 11px;"><a href="#!"><i class="fa fa-star-half"></i></a></li>
+                                                    }
+                                                }
+                                            }
+                                            @for (int i = 0; i < 5 - item.ScoreRating - count; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="price">
+                                        <h6 style="text-transform: none;">Giá: @String.Format("{0:0,0}", ((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))</h6>
+                                        @if (item.DiscountPercent != 0)
+                                        {
+                                            <h6 class="l-through">@String.Format("{0:0,0}", item.UnitSellPrice)</h6>
+                                        }
+                                    </div>
+                                    <div class="prd-bottom">
+
+                                        <a onclick="AddToShoppingCart('@item.ProductID', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.SizeID)', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.ColorID)')" class="social-info">
+                                            <span class="ti-bag" style="background: #222222;"></span>
+                                            <p class="hover-text">Đặt hàng</p>
+                                        </a>
+                                        <a href="#!" class="social-info" onclick="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ item.ProductID +"')" : "FavouriteProduct('"+ item.ProductID +"')")">
+                                            <span id="favourite-@item.ProductID" class="lnr lnr-heart" style="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")"></span>
+                                            <p class="hover-text">Yêu thích</p>
+                                        </a>
+                                        <a href="@Url.Action("chi-tiet-san-pham","Product", new { id = item.ProductID })" class="social-info">
+                                            <span class="lnr lnr-move" style="background: #222222;"></span>
+                                            <p class="hover-text">Chi tiết</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- single product slide -->
+    <div class="single-product-slider">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="section-title">
+                        <h1 class="font-weight-bold">Giảm giá cực <label class="text-danger">SỐC</label></h1>
+                        <p>
+                            Người bạn đồng hành hoàn hảo cho đôi chân của bạn.
+                            Bước và tỏa sáng.
+                            Đôi giày sẽ dẫn bạn đến thành công.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var item in ListDiscountProduct)
+                {
+                    <!-- single product -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="single-product card shadow">
+                            <div class="card-body" style="width: 250px; height: 250px;">
+                                <img class="img-fluid" src="@(item.ProductPhotoes.FirstOrDefault() == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.ProductPhotoes.FirstOrDefault().Photo)) " alt="" style="width: 100%; height: 100%;">
+                                @if (item.DiscountPercent != 0)
+                                {
+                                    <div class="ribbon-wrapper ribbon-lg">
+                                        <div class="ribbon text-lg text-white" style="background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);">
+                                            Giảm @(item.DiscountPercent)%
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="product-details">
+                                    <h6 style="text-transform: none;" class="mb-0">
+                                        @item.ProductName
+                                    </h6>
+                                    <div style="font-size: 16px;" class="review_box">
+                                        <ul class="list pl-0">
+                                            @for (int i = 0; i < (int)item.ScoreRating; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star"></i></a></li>
+                                            }
+                                            @{
+                                                var count = 0;
+                                                var odd = item.ScoreRating - (int)item.ScoreRating;
+                                                if (odd >= 0.8)
+                                                {
+                                                    count = 1;
+                                                    <li><a href="#!"><i class="fa fa-star"></i>@odd</a></li>
+                                                }
+                                                else
+                                                {
+                                                    if (odd >= 0.3)
+                                                    {
+                                                        count = 1;
+                                                        <li style="width: 11px;"><a href="#!"><i class="fa fa-star-half"></i></a></li>
+                                                    }
+                                                }
+                                            }
+                                            @for (int i = 0; i < 5 - item.ScoreRating - count; i++)
+                                            {
+                                                <li><a href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="price">
+                                        <h6 style="text-transform: none;">Giá: @String.Format("{0:0,0}", ((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))</h6>
+                                        @if (item.DiscountPercent != 0)
+                                        {
+                                            <h6 class="l-through">@String.Format("{0:0,0}", item.UnitSellPrice)</h6>
+                                        }
+                                    </div>
+                                    <div class="prd-bottom">
+
+                                        <a onclick="AddToShoppingCart('@item.ProductID', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.SizeID)', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.ColorID)')" class="social-info">
+                                            <span class="ti-bag" style="background: #222222;"></span>
+                                            <p class="hover-text">Đặt hàng</p>
+                                        </a>
+                                        <a href="#!" class="social-info" onclick="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ item.ProductID +"')" : "FavouriteProduct('"+ item.ProductID +"')")">
+                                            <span id="favourite-@item.ProductID" class="lnr lnr-heart" style="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")"></span>
+                                            <p class="hover-text">Yêu thích</p>
+                                        </a>
+                                        <a href="@Url.Action("chi-tiet-san-pham","Product", new { id = item.ProductID })" class="social-info">
+                                            <span class="lnr lnr-move" style="background: #222222;"></span>
+                                            <p class="hover-text">Chi tiết</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end product Area -->
+@section scripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <script>
+        function AddToShoppingCart(productid, sizeid, colorid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("them-vao-gio-hang","ShoppingCart")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid, quantity: 1 }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function UnfavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("huy-yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+        function FavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký tài khoản</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/fontawesome-free/css/all.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/Asset/Manager/dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition register-page">
+    <div class="register-box">
+        <div class="card-header text-center">
+            <a href="#" class="h1"><b>Admin</b>Yolo</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body register-card-body">
+                <p class="login-box-msg">Đăng ký tài khoản mới</p>
+                @using (Html.BeginForm("dang-ky", "Admin", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="input-group mb-3">
+                        <input name="firstname" type="text" class="form-control" placeholder="Họ" required maxlength="50">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input name="lastname" type="text" class="form-control" placeholder="Tên" required maxlength="50">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input name="phone" type="text" class="form-control" placeholder="Điện thoại" required maxlength="10">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-phone"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input name="email" type="email" class="form-control" placeholder="Email"  required maxlength="254">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input name="password" type="password" class="form-control" placeholder="Mật khẩu" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input name="retypepassword" type="password" class="form-control" placeholder="Nhập lại mật khẩu" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <p class="@( "Đăng ký tài khoản thành công.".Equals(ViewBag.Notification) ? "text-success" : "text-danger")">
+                            @ViewBag.Notification
+                        </p>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="agreeTerms" name="terms" value="agree" onchange="ChangeAgreeTerm()">
+                                <label for="agreeTerms">
+                                    Tôi đồng ý với các <a href="#">chính sách</a>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-8"></div>
+                        <!-- /.col -->
+                        <div class="col-4">
+                            <button id="submit" type="submit" class="btn btn-primary btn-block" disabled>Đăng ký</button>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                }
+
+                <a href="@Url.Action("dang-nhap", "Admin")" class="text-center">Tôi đã có tài khoản.</a>
+            </div>
+            <!-- /.form-box -->
+        </div><!-- /.card -->
+    </div>
+    <!-- /.register-box -->
+    <!-- jQuery -->
+    <script src="~/Asset/Manager/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/Asset/Manager/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/Asset/Manager/dist/js/adminlte.min.js"></script>
+    <script>
+        function ChangeAgreeTerm() {
+            document.getElementById("agreeTerms").checked == true ? document.getElementById("submit").disabled = false : document.getElementById("submit").disabled = true;
+        }
+    </script>
+</body>
+</html>

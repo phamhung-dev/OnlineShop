@@ -1,0 +1,1716 @@
+﻿@model IEnumerable<Model.EF.Product>
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+    List<Model.EF.ProductCategory> ListProductCategory = ViewBag.ListProductCategory as List<Model.EF.ProductCategory>;
+    List<Model.EF.Age> ListAge = ViewBag.ListAge as List<Model.EF.Age>;
+    List<Model.EF.Size> ListSize = ViewBag.ListSize as List<Model.EF.Size>;
+    List<Model.EF.Color> ListColor = ViewBag.ListColor as List<Model.EF.Color>;
+    List<Model.EF.Supplier> ListSupplierContacting = ViewBag.ListSupplierContacting as List<Model.EF.Supplier>;
+    List<Model.EF.ProductCategory> ListProductCategorySelling = ViewBag.ListProductCategorySelling as List<Model.EF.ProductCategory>;
+    List<Model.EF.Age> ListAgeSelling = ViewBag.ListAgeSelling as List<Model.EF.Age>;
+}
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<div class="card card-warning card-outline collapsed-card ml-1 mt-3">
+    <div class="card-header">
+        <h3 class="card-title">Kích thước</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-size"><i class="fas fa-plus"></i> Thêm kích thước</button>
+        <table id="myTableSize" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListSize)
+                {
+                    <tr id="row-@item.SizeID">
+                        <td>@item.SizeID</td>
+                        <td>@item.SizeName</td>
+                        <td>@Html.CheckBoxFor(modelItem => item.Status, new { @id = "status-" + item.SizeID, @onchange = "ChangeStatusSize('" + item.SizeID + "')" })</td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionSize('@item.SizeID')"><i class="fas fa-edit"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="card card-warning card-outline collapsed-card ml-1 mt-1">
+    <div class="card-header">
+        <h3 class="card-title">Màu sắc</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-color"><i class="fas fa-plus"></i> Thêm màu sắc</button>
+        <table id="myTableColor" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListColor)
+                {
+                    <tr id="row-@item.ColorID">
+                        <td>@item.ColorID&nbsp;&nbsp;<span><i class="fas fa-square" style="color: @item.ColorID"></i></span></td>
+                        <td>@item.ColorName</td>
+                        <td>@Html.CheckBoxFor(modelItem => item.Status, new { @id = "status-" + item.ColorID, @onchange = "ChangeStatusColor('" + item.ColorID + "')" })</td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionColor('@item.ColorID')"><i class="fas fa-edit"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="card card-primary card-outline collapsed-card ml-1 mt-1">
+    <div class="card-header">
+        <h3 class="card-title">Loại sản phẩm</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-productcategory"><i class="fas fa-plus"></i> Thêm loại sản phẩm</button>
+        <table id="myTableProductCategory" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListProductCategory)
+                {
+                    <tr id="productcategory-row-@item.ProductCategoryID">
+                        <td>@item.ProductCategoryName</td>
+                        <td>
+                            @Html.CheckBoxFor(modelItem => item.Status, new { @id = "productcategory-status-" + item.ProductCategoryID, @onchange = "ChangeStatusProductCategory('" + item.ProductCategoryID + "')" })
+                        </td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionProductCategory('@item.ProductCategoryID')"><i class="fas fa-edit"></i></a>
+                            <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionProductCategory('@item.ProductCategoryID')"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="card card-primary card-outline collapsed-card ml-1 mt-1">
+    <div class="card-header">
+        <h3 class="card-title">Độ tuổi</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-age"><i class="fas fa-plus"></i> Thêm độ tuổi</button>
+        <table id="myTableAge" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListAge)
+                {
+                    <tr id="age-row-@item.AgeID">
+                        <td>@item.AgeName</td>
+                        <td>
+                            @Html.CheckBoxFor(modelItem => item.Status, new { @id = "age-status-" + item.AgeID, @onchange = "ChangeStatusAge('" + item.AgeID + "')" })
+                        </td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionAge('@item.AgeID')"><i class="fas fa-edit"></i></a>
+                            <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionAge('@item.AgeID')"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Tên</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="card card-olive card-outline ml-1 mt-1">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách sản phẩm</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-xl-insert" onclick="ClearProductInfoInsert()"><i class="fas fa-plus"></i> Thêm sản phẩm</button>
+        <table id="myTableProduct" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>NCC</th>
+                    <th>Loại</th>
+                    <th>Giới tính</th>
+                    <th>Đánh giá</th>
+                    <th>Giá bán</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.ProductID">
+                        <td>@item.ProductID</td>
+                        <td>@item.ProductName</td>
+                        <td>@item.Supplier.SupplierName</td>
+                        <td>@item.ProductCategory.ProductCategoryName</td>
+                        <td>@(item.Gender == true ? "Nam" : "Nữ")</td>
+                        <td>@item.ScoreRating/5</td>
+                        <td>@String.Format("{0:0,0}", item.UnitSellPrice)</td>
+                        <td>@Html.CheckBoxFor(modelItem => item.Status, new { @id = "status-" + item.ProductID, @onchange = "ChangeStatusProduct('" + item.ProductID + "')" })</td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-xl" onclick="GetProductById('@item.ProductID')"><i class="fas fa-edit"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>NCC</th>
+                    <th>Loại</th>
+                    <th>Giới tính</th>
+                    <th>Đánh giá</th>
+                    <th>Giá bán</th>
+                    <th>Đang kinh doanh</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 id="title-for-modal" class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="name">Tên</label>
+                    <input type="text" class="form-control" placeholder="Nhập tên thay đổi" id="name" />
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="update" type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg-color">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm màu sắc mới</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Color Picker -->
+                <div class="form-group">
+                    <label>Chọn màu sắc</label>
+
+                    <div class="input-group my-colorpicker2">
+                        <input id="colorid" type="text" class="form-control" onkeypress="return false;">
+
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-square"></i></span>
+                        </div>
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <!-- /.form group -->
+                <!--ColorName-->
+                <div class="form-group">
+                    <label>Tên</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Tên màu" id="colorname" required maxlength="50"/>
+                    </div>
+                </div>
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="colorstatus" class="form-control">
+                            <option value="true">Đang kinh doanh</option>
+                            <option value="false">Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="insertColor" type="button" class="btn btn-primary" onclick="InsertColor()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg-size">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm kích thước</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- SizeID -->
+                <div class="form-group">
+                    <label>Mã</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Mã kích thước" id="sizeid" required maxlength="7" />
+                    </div>
+                </div>
+                <!-- /.form group -->
+                <!--SizeName-->
+                <div class="form-group">
+                    <label>Tên</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Tên kích thước" id="sizename" required maxlength="50" />
+                    </div>
+                </div>
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="sizestatus" class="form-control">
+                            <option value="true">Đang kinh doanh</option>
+                            <option value="false">Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="insertSize" type="button" class="btn btn-primary" onclick="InsertSize()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg-productcategory">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm loại sản phẩm</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- /.form group -->
+                <!--ProductCategoryName-->
+                <div class="form-group">
+                    <label>Tên</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Tên loại sản phẩm" id="productcategoryname" required maxlength="300" />
+                    </div>
+                </div>
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="productcategorystatus" class="form-control">
+                            <option value="true">Đang kinh doanh</option>
+                            <option value="false">Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="insertProductCategory" type="button" class="btn btn-primary" onclick="InsertProductCategory()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg-age">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm độ tuổi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- /.form group -->
+                <!--AgeName-->
+                <div class="form-group">
+                    <label>Tên</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Tên độ tuổi" id="agename" required maxlength="300" />
+                    </div>
+                </div>
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="agestatus" class="form-control">
+                            <option value="true">Đang kinh doanh</option>
+                            <option value="false">Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="insertAge" type="button" class="btn btn-primary" onclick="InsertAge()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-xl">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 id="title-product" class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Hình</label>
+                            <div class="col-md-12">
+                                <div class="col-6 mx-auto d-flex align-items-center" style="height: 222px;">
+                                    <div class="d-flex">
+                                        <img src="~/Asset/Manager/dist/img/prod-2.jpg" class="product-image" alt="Product Image" id="image-current">
+                                        <button id="remove-image" class="btn btn-danger ml-4" style="height: 40px;margin-top: 70px; display:none;"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="product-image-thumbs row" id="list-image" style="height: 106.91px;">
+                                    <div class="col-2 mb-3" style="width: 75.912px; height: 84.063px;" id="div-add-image"><button id="add-image" class="btn btn-primary"><i class="fas fa-plus"></i></button></div>
+                                    <input name="fileUpload" id="fileUpload" accept="images/*" type="file" hidden />
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ScoreRating-->
+                        <label id="scorerating">Đánh giá: </label>
+                        <!-- Warranty-->
+                        <div class="form-group">
+                            <label for="warranty">Bảo hành (tháng)</label>
+                            <input type="number" min="0" id="warranty" class="form-control" onkeydown="return false;" value="0"/>
+                        </div>
+                        <!-- /.form group -->
+                        <div class="form-group">
+                            <label for="discountpercent">Khuyến mãi (%)</label>
+                            <input type="number" min="0" id="discountpercent" class="form-control" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="unitimportprice">Giá nhập</label>
+                            <input type="number" min="0" id="unitimportprice" class="form-control" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="unitsellprice">Giá bán</label>
+                            <input type="number" min="0" id="unitsellprice" class="form-control" value="0" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!--ProductName-->
+                        <div class="form-group">
+                            <label>Tên</label>
+                            <input type="text" class="form-control" placeholder="Tên sản phẩm" id="productname" maxlength="300"/>
+                        </div>
+                        <!-- Description-->
+                        <div class="form-group">
+                            <label for="description">Mô tả</label>
+                            <textarea id="description" class="form-control" rows="5"></textarea>
+                        </div>
+                        <!-- /.form group -->
+                        <!--SupplierID-->
+                        <div class="form-group">
+                            <label>Nhà cung cấp</label>
+                            <select id="supplierid" class="form-control">
+                                @foreach (var item in ListSupplierContacting)
+                                {
+                                    <option value="@item.SupplierID">@item.SupplierName</option>
+                                }
+                            </select>
+                        </div>
+                        <!--ProductCategoryID-->
+                        <div class="form-group">
+                            <label>Loại</label>
+                            <select id="productcategoryid" class="form-control">
+                                @foreach (var item in ListProductCategorySelling)
+                                {
+                                    <option value="@item.ProductCategoryID">@item.ProductCategoryName</option>
+                                }
+                            </select>
+                        </div>
+                        <!--AgeID-->
+                        <div class="form-group">
+                            <label>Độ tuổi</label>
+                            <select id="ageid" class="form-control">
+                                @foreach (var item in ListAgeSelling)
+                                {
+                                    <option value="@item.AgeID">@item.AgeName</option>
+                                }
+                            </select>
+                        </div>
+                        <!-- Select Gender-->
+                        <div class="form-group">
+                            <label>Giới tính</label>
+                            <select id="gender" class="form-control">
+                                <option value="true">Nam</option>
+                                <option value="false">Nữ</option>
+                            </select>
+                        </div>
+                        <!-- /.form group -->
+                        <div class="form-group">
+                            <label>Hiển thị trên trang chủ</label>
+                            <select id="showonhome" class="form-control">
+                                <option value="true">Hiện</option>
+                                <option value="false">Ẩn</option>
+                            </select>
+                        </div>
+                        <!-- Select Status-->
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select id="productstatus" class="form-control">
+                                <option value="true">Đang kinh doanh</option>
+                                <option value="false">Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+                        <!-- /.form group -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="updateProduct" type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<!--insert  product-->
+<div class="modal fade" id="modal-xl-insert">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm sản phẩm</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Hình</label>
+                            <div class="col-md-12">
+                                <div class="col-6 mx-auto d-flex align-items-center" style="height: 216px;">
+                                    <div class="d-flex">
+                                        <img src="~/Asset/Manager/dist/img/prod-2.jpg" class="product-image insert" alt="Product Image" id="image-current-insert">
+                                        <button id="remove-image-insert" class="btn btn-danger ml-4" style="height: 40px;margin-top: 70px; display:none;"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="product-image-thumbs row" id="list-image-insert" style="height: 106.91px;">
+                                    <div class="col-2 mb-3" style="width: 75.912px; height: 84.063px;" id="div-add-image-insert"><button id="add-image-insert" class="btn btn-primary"><i class="fas fa-plus"></i></button></div>
+                                    <input name="fileUpload-insert" id="fileUpload-insert" accept="images/*" type="file" hidden />
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Warranty-->
+                        <div class="form-group">
+                            <label for="warranty-insert">Bảo hành (tháng)</label>
+                            <input type="number" min="0" id="warranty-insert" class="form-control" onkeydown="return false;" value="0" />
+                        </div>
+                        <!-- /.form group -->
+                        <div class="form-group">
+                            <label for="discountpercent-insert">Khuyến mãi (%)</label>
+                            <input type="number" min="0" id="discountpercent-insert" class="form-control" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="unitimportprice-insert">Giá nhập</label>
+                            <input type="number" min="0" id="unitimportprice-insert" class="form-control" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="unitsellprice-insert">Giá bán</label>
+                            <input type="number" min="0" id="unitsellprice-insert" class="form-control" value="0" />
+                        </div>
+                        <!-- /.form group -->
+                        <div class="form-group">
+                            <label>Hiển thị trên trang chủ</label>
+                            <select id="showonhome-insert" class="form-control">
+                                <option value="true">Hiện</option>
+                                <option value="false">Ẩn</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- ProductID-->
+                        <div class="form-group">
+                            <label for="productid-insert">Mã</label>
+                            <input type="text" id="productid-insert" class="form-control" placeholder="Mã sản phẩm" maxlength="20" />
+                        </div>
+                        <!--ProductName-->
+                        <div class="form-group">
+                            <label>Tên</label>
+                            <input type="text" class="form-control" placeholder="Tên sản phẩm" id="productname-insert" maxlength="300" />
+                        </div>
+                        <!-- Description-->
+                        <div class="form-group">
+                            <label for="description">Mô tả</label>
+                            <textarea id="description-insert" class="form-control" rows="7"></textarea>
+                        </div>
+                        <!-- /.form group -->
+                        <!--SupplierID-->
+                        <div class="form-group">
+                            <label>Nhà cung cấp</label>
+                            <select id="supplierid-insert" class="form-control">
+                                @foreach (var item in ListSupplierContacting)
+                                {
+                                    <option value="@item.SupplierID">@item.SupplierName</option>
+                                }
+                            </select>
+                        </div>
+                        <!--ProductCategoryID-->
+                        <div class="form-group">
+                            <label>Loại</label>
+                            <select id="productcategoryid-insert" class="form-control">
+                                @foreach (var item in ListProductCategorySelling)
+                                {
+                                    <option value="@item.ProductCategoryID">@item.ProductCategoryName</option>
+                                }
+                            </select>
+                        </div>
+                        <!--AgeID-->
+                        <div class="form-group">
+                            <label>Độ tuổi</label>
+                            <select id="ageid-insert" class="form-control">
+                                @foreach (var item in ListAgeSelling)
+                                {
+                                    <option value="@item.AgeID">@item.AgeName</option>
+                                }
+                            </select>
+                        </div>
+                        <!-- Select Gender-->
+                        <div class="form-group">
+                            <label>Giới tính</label>
+                            <select id="gender-insert" class="form-control">
+                                <option value="true">Nam</option>
+                                <option value="false">Nữ</option>
+                            </select>
+                        </div>
+                        <!-- Select Status-->
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select id="productstatus-insert" class="form-control">
+                                <option value="true">Đang kinh doanh</option>
+                                <option value="false">Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+                        <!-- /.form group -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="InsertProduct()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa không?
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Không</button>
+                <button id="delete" type="button" class="btn btn-primary">Có</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <!-- bootstrap color picker -->
+    <script src="~/Asset/Manager/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <!-- Page specific script -->
+    <script>
+        $(document).ready(function () {
+            ImageActive();
+            ImageActiveInsert();
+        });
+        function ImageActiveInsert() {
+            $('.product-image-thumb.insert').on('click', function () {
+                var $image_element = $(this).find('img')
+                $('.product-image.insert').prop('src', $image_element.attr('src'))
+                $('.product-image-thumb.insert.active').removeClass('active')
+                $(this).addClass('active')
+                document.getElementById('remove-image-insert').style.display = 'inline-block';
+            })
+        };
+        function ImageActive() {
+            $('.product-image-thumb').on('click', function () {
+                var $image_element = $(this).find('img')
+                $('.product-image').prop('src', $image_element.attr('src'))
+                $('.product-image-thumb.active').removeClass('active')
+                $(this).addClass('active')
+                document.getElementById('remove-image').style.display = 'inline-block';
+            })
+        };
+        $(function () {
+            $('#add-image-insert').click(function () {
+                document.getElementById('fileUpload-insert').value = null;
+                $('#fileUpload-insert').trigger('click');
+            });
+            $('#remove-image-insert').click(function () {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/admin/quan-ly/san-pham/xoa-hinh-san-pham-chua-ton-tai",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ file: document.getElementById('image-current-insert').getAttribute('src') }),
+                        async: true,
+                        processData: false,
+                        cache: false,
+                        success: function (result) {
+                            if (result.success) {
+                                const elements = document.getElementById('list-image-insert').getElementsByClassName('product-image-thumb col-2 mb-3 active');
+                                while (elements.length > 0) {
+                                    elements[0].parentNode.removeChild(elements[0]);
+                                }
+                                if (document.getElementById('list-image-insert').querySelectorAll('[name=gallery-image-insert]').length < 5) {
+                                    document.getElementById('div-add-image-insert').style.display = 'block';
+                                }
+                                document.getElementById('remove-image-insert').style.display = 'none';
+                                document.getElementById('image-current-insert').src = "../../../Asset/Manager/dist/img/prod-2.jpg";
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            });
+            $('#add-image').click(function () {
+                document.getElementById('fileUpload').value = null;
+                $('#fileUpload').trigger('click');
+            });
+            $('#remove-image').click(function () {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/admin/quan-ly/san-pham/xoa-hinh-san-pham-da-ton-tai",
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ file: document.getElementById('image-current').getAttribute('src') }),
+                        async: true,
+                        processData: false,
+                        cache: false,
+                        success: function (result) {
+                            if (result.success) {
+                                const elements = document.getElementById('list-image').getElementsByClassName('product-image-thumb col-2 mb-3 active');
+                                while (elements.length > 0) {
+                                    elements[0].parentNode.removeChild(elements[0]);
+                                }
+                                if (document.getElementById('list-image').querySelectorAll('[name=gallery-image]').length < 5) {
+                                    document.getElementById('div-add-image').style.display = 'block';
+                                }
+                                document.getElementById('remove-image').style.display = 'none';
+                                document.getElementById('image-current').src = "../../../Asset/Manager/dist/img/prod-2.jpg";
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            });
+        });
+        $('#fileUpload').change(function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $('#fileUpload').get(0);
+                var files = fileUpload.files;
+                var formData = new FormData();
+                formData.append('file', files[0]);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: '/admin/quan-ly/san-pham/them-hinh-san-pham-da-ton-tai',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                document.getElementById('list-image').insertAdjacentHTML('afterbegin', '<div name="gallery-image" class="product-image-thumb col-2 mb-3"><img src="' + result.path.replace('~', '../../../') + '" alt="Product Image"></div>');
+                                ImageActive();
+                                if (document.getElementById('list-image').querySelectorAll('[name=gallery-image]').length >= 5) {
+                                    document.getElementById('div-add-image').style.display = 'none';
+                                }
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            }
+        });
+        $('#fileUpload-insert').change(function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $('#fileUpload-insert').get(0);
+                var files = fileUpload.files;
+                var formData = new FormData();
+                formData.append('file', files[0]);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: '/admin/quan-ly/san-pham/them-hinh-san-pham-chua-ton-tai',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                document.getElementById('list-image-insert').insertAdjacentHTML('afterbegin', '<div name="gallery-image-insert" class="product-image-thumb insert col-2 mb-3"><img src="' + result.path.replace('~', '../../../') + '" alt="Product Image"></div>');
+                                ImageActiveInsert();
+                                if (document.getElementById('list-image-insert').querySelectorAll('[name=gallery-image-insert]').length >= 5) {
+                                    document.getElementById('div-add-image-insert').style.display = 'none';
+                                }
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            }
+        });
+        function ClearProductInfoInsert() {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/san-pham/huy-them-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("productid-insert").value = null;
+                        document.getElementById("productname-insert").value = null;
+                        document.getElementById("supplierid-insert").value = "TRONG";
+                        document.getElementById("productcategoryid-insert").selectedIndex = "0";
+                        document.getElementById("ageid-insert").selectedIndex = "0";
+                        document.getElementById("gender-insert").selectedIndex = "0";
+                        document.getElementById("description-insert").value = null;
+                        document.getElementById("warranty-insert").value = "0";
+                        document.getElementById("unitimportprice-insert").value = "0";
+                        document.getElementById("unitsellprice-insert").value = "0";
+                        document.getElementById("discountpercent-insert").value = "0";
+                        document.getElementById("showonhome-insert").selectedIndex = "0";
+                        document.getElementById("productstatus-insert").selectedIndex = "0";
+                        document.querySelectorAll('[name=gallery-image-insert]').forEach(e => e.remove());
+                        document.getElementById('remove-image-insert').style.display = 'none';
+                        document.getElementById('image-current-insert').src = "../../../Asset/Manager/dist/img/prod-2.jpg";
+                        document.getElementById('div-add-image-insert').style.display = 'block';
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ClearProductInfo() {
+            document.getElementById("title-product").value = null;
+            document.getElementById("productname").value = null;
+            document.getElementById("supplierid").value = "TRONG";
+            document.getElementById("productcategoryid").selectedIndex = "0";
+            document.getElementById("ageid").selectedIndex = "0";
+            document.getElementById("gender").selectedIndex = "0";
+            document.getElementById("description").value = null;
+            document.getElementById("warranty").value = "0";
+            document.getElementById("scorerating").innerText = "Đánh giá:";
+            document.getElementById("unitimportprice").value = "0";
+            document.getElementById("unitsellprice").value = "0";
+            document.getElementById("discountpercent").value = "0";
+            document.getElementById("showonhome").selectedIndex = "0";
+            document.getElementById("productstatus").selectedIndex = "0";
+            document.querySelectorAll('[name=gallery-image]').forEach(e => e.remove());
+            document.getElementById('remove-image').style.display = 'none';
+            document.getElementById('image-current').src = "../../../Asset/Manager/dist/img/prod-2.jpg";
+            document.getElementById('div-add-image').style.display = 'block';
+        }
+        function InsertProduct() {
+            var productid = document.getElementById("productid-insert").value.replace(/^\s+|\s+$/gm, '');
+            var productname = document.getElementById("productname-insert").value.replace(/^\s+|\s+$/gm, '');
+            var supplierid = document.getElementById("supplierid-insert").value;
+            var productcategoryid = document.getElementById("productcategoryid-insert").value;
+            var ageid = document.getElementById("ageid-insert").value;
+            var gender = document.getElementById("gender-insert").value;
+            var description = document.getElementById("description-insert").value.replace(/^\s+|\s+$/gm, '');
+            var warranty = document.getElementById("warranty-insert").value;
+            var unitimportprice = document.getElementById("unitimportprice-insert").value;
+            var unitsellprice = document.getElementById("unitsellprice-insert").value;
+            var discountpercent = document.getElementById("discountpercent-insert").value;
+            var showonhome = document.getElementById("showonhome-insert").value;
+            var status = document.getElementById("productstatus-insert").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/san-pham/them-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid, productname: productname, supplierid: supplierid, productcategoryid: productcategoryid, ageid: ageid, gender: gender, description: description, warranty: warranty, unitimportprice: unitimportprice, unitsellprice: unitsellprice, discountpercent: discountpercent, showonhome: showonhome, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + productid + '">' +
+                            '<td>' + productid + '</td>' +
+                            '<td>' + productname + '</td>' +
+                            '<td>' + document.getElementById("supplierid-insert").options[document.getElementById("supplierid-insert").selectedIndex].text + '</td>' +
+                            '<td>' + document.getElementById("productcategoryid-insert").options[document.getElementById("productcategoryid-insert").selectedIndex].text + '</td>' +
+                            '<td>' + document.getElementById("gender-insert").options[document.getElementById("gender-insert").selectedIndex].text + '</td>' +
+                            '<td>0/5</td>' +
+                            '<td>' + unitsellprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + productid + '" onchange = "ChangeStatusProduct(\'' + productid + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-xl" onclick="GetProductById(\'' + productid + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableProduct').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        ClearProductInfoInsert();
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetIdForAnotherFunctionProduct(id) {
+            document.getElementById('updateProduct').onclick = function () { UpdateProduct(id); };
+        }
+
+        function UpdateProduct(id) {
+            var productname = document.getElementById("productname").value.replace(/^\s+|\s+$/gm, '');
+            var supplierid = document.getElementById("supplierid").value;
+            var productcategoryid = document.getElementById("productcategoryid").value;
+            var ageid = document.getElementById("ageid").value;
+            var gender = document.getElementById("gender").value;
+            var description = document.getElementById("description").value.replace(/^\s+|\s+$/gm, '');
+            var scorerating = document.getElementById('row-' + id).cells[5].innerText.replace(/^\s+|\s+$/gm, '');
+            var warranty = document.getElementById("warranty").value;
+            var unitimportprice = document.getElementById("unitimportprice").value;
+            var unitsellprice = document.getElementById("unitsellprice").value;
+            var discountpercent = document.getElementById("discountpercent").value;
+            var showonhome = document.getElementById("showonhome").value;
+            var status = document.getElementById("productstatus").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/san-pham/cap-nhat-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: id, productname: productname, supplierid: supplierid, productcategoryid: productcategoryid, ageid: ageid, gender: gender, description: description, warranty: warranty, unitimportprice: unitimportprice, unitsellprice: unitsellprice, discountpercent: discountpercent, showonhome: showonhome, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + id + '">' +
+                            '<td>' + id + '</td>' +
+                            '<td>' + productname + '</td>' +
+                            '<td>' + document.getElementById("supplierid").options[document.getElementById("supplierid").selectedIndex].text + '</td>' +
+                            '<td>' + document.getElementById("productcategoryid").options[document.getElementById("productcategoryid").selectedIndex].text + '</td>' +
+                            '<td>' + document.getElementById("gender").options[document.getElementById("gender").selectedIndex].text + '</td>' +
+                            '<td>' + scorerating + '</td>' +
+                            '<td>' + unitsellprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + id + '" onchange = "ChangeStatusProduct(\'' + id + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-xl" onclick="GetProductById(\'' + id + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableProduct').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        $('#modal-xl').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+
+        function b64encode(d) {
+            return btoa(String.fromCharCode.apply(d, d)).replace(/.{76}(?=.)/g, '$&\n');
+        };
+        function GetProductById(id) {
+            ClearProductInfo();
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/san-pham/xem-san-pham",
+                cache: false,
+                data: { id: id },
+                success: function (result) {
+                    GetIdForAnotherFunctionProduct(result.product.ProductID);
+                    document.getElementById("title-product").innerText = "Thông tin sản phẩm - Mã SP: " + result.product.ProductID;
+                    document.getElementById("productname").value = result.product.ProductName;
+                    document.getElementById("supplierid").value = result.product.SupplierID;
+                    document.getElementById("productcategoryid").value = result.product.ProductCategoryID;
+                    document.getElementById("ageid").value = result.product.AgeID;
+                    document.getElementById("gender").value = result.product.Gender;
+                    document.getElementById("description").value = result.product.Description;
+                    document.getElementById("warranty").value = result.product.Warranty;
+                    document.getElementById("scorerating").innerText = "Đánh giá: " + result.product.ScoreRating + "/5";
+                    document.getElementById("unitimportprice").value = result.product.UnitImportPrice;
+                    document.getElementById("unitsellprice").value = result.product.UnitSellPrice;
+                    document.getElementById("discountpercent").value = result.product.DiscountPercent;
+                    document.getElementById("showonhome").value = result.product.ShowOnHome;
+                    document.getElementById("productstatus").value = result.product.Status;
+                    document.getElementById('remove-image').style.display = 'none';
+                    document.getElementById('image-current').src = "../../../Asset/Manager/dist/img/prod-2.jpg";
+                    document.getElementById('div-add-image').style.display = 'block';
+                    for (let i = 0; i < result.productPhoto.length; i++) {
+                        document.getElementById('list-image').insertAdjacentHTML('afterbegin', '<div name="gallery-image" class="product-image-thumb col-2 mb-3"><img src="data:image/png;base64, ' + b64encode(result.productPhoto[i]) + '" alt="Product Image"></div>');
+                    }
+                    ImageActive();
+                    if (document.getElementById('list-image').querySelectorAll('[name=gallery-image]').length >= 5) {
+                        document.getElementById('div-add-image').style.display = 'none';
+                    }
+                }
+            });
+        }
+        $(function () {
+            $('#myTableSize').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTableSize_wrapper .col-md-6:eq(0)');
+        });
+
+        function ChangeStatusSize(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/kich-thuoc/thay-doi-trang-thai-kich-thuoc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+
+        function UpdateSize(id) {
+            var input = document.getElementById("name").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById('status-' + id).checked;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/kich-thuoc/cap-nhat-kich-thuoc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, sizename: input }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + id + '">' +
+                            '<td>' + id + '</td>' +
+                            '<td>' + input + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + id + '" onchange = "ChangeStatusSize(\'' + id + '\')" ' + (status == true ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionSize(\'' + id + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableSize').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById('name').value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+
+        function GetIdForAnotherFunctionSize(id) {
+            document.getElementById('title-for-modal').innerText = "Thay đổi tên kích thước";
+            document.getElementById('update').onclick = function () { UpdateSize(id); };
+        }
+
+        $(function () {
+            $('#myTableColor').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTableColor_wrapper .col-md-6:eq(0)');
+        });
+
+        $(function () {
+            $('#myTableProduct').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTableProduct_wrapper .col-md-6:eq(0)');
+        });
+
+        //color picker with addon
+        $('.my-colorpicker2').colorpicker()
+
+        $('.my-colorpicker2').on('colorpickerChange', function (event) {
+            $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
+        })
+
+        function ChangeStatusColor(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/mau-sac/thay-doi-trang-thai-mau-sac",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+
+        function UpdateColor(id) {
+            var input = document.getElementById("name").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById('status-' + id).checked;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/mau-sac/cap-nhat-mau-sac",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, colorname: input }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + id + '">' +
+                            '<td>' + id + '&nbsp;&nbsp;<span><i class="fas fa-square" style="color: ' + id + '"></i></span></td>' +
+                            '<td>' + input + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + id + '" onchange = "ChangeStatusColor(\'' + id + '\')" ' + (status == true ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionColor(\'' + id + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableColor').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById('name').value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+
+        function GetIdForAnotherFunctionColor(id) {
+            document.getElementById('title-for-modal').innerText = "Thay đổi tên màu sắc";
+            document.getElementById('update').onclick = function () { UpdateColor(id); };
+        }
+        function InsertColor() {
+            var colorid = document.getElementById("colorid").value.replace(/^\s+|\s+$/gm, '');
+            var colorname = document.getElementById("colorname").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("colorstatus").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/mau-sac/them-mau-sac",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ colorid: colorid, colorname: colorname, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + colorid + '">' +
+                            '<td>' + colorid + '&nbsp;&nbsp;<span><i class="fas fa-square" style="color: ' + colorid + '"></i></span></td>' +
+                            '<td>' + colorname + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + colorid + '" onchange = "ChangeStatusColor(\'' + colorid + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionColor(\'' + colorid + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableColor').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById("colorid").value = null;
+                        document.getElementById("colorname").value = null;
+                        document.getElementById("colorstatus").value = 'true';
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function InsertSize() {
+            var sizeid = document.getElementById("sizeid").value.replace(/^\s+|\s+$/gm, '');
+            var sizename = document.getElementById("sizename").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("sizestatus").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/kich-thuoc/them-kich-thuoc",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ sizeid: sizeid, sizename: sizename, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + sizeid + '">' +
+                            '<td>' + sizeid + '</td>' +
+                            '<td>' + sizename + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + sizeid + '" onchange = "ChangeStatusSize(\'' + sizeid + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionSize(\'' + sizeid + '\')"><i class="fas fa-edit"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableSize').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById("sizeid").value = null;
+                        document.getElementById("sizename").value = null;
+                        document.getElementById("sizestatus").value = 'true';
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ChangeStatusProduct(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/san-pham/thay-doi-trang-thai-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+        $(function () {
+            $('#myTableProductCategory').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTableProductCategory_wrapper .col-md-6:eq(0)');
+        });
+        function ChangeStatusProductCategory(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/loai-san-pham/thay-doi-trang-thai-loai-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('productcategory-status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+        function GetIdForAnotherFunctionProductCategory(id) {
+            document.getElementById('title-for-modal').innerText = "Thay đổi tên loại sản phẩm";
+            document.getElementById('update').onclick = function () { UpdateProductCategory(id); };
+            document.getElementById('delete').onclick = function () { DeleteProductCategory(id); };
+        }
+        function UpdateProductCategory(id) {
+            var input = document.getElementById("name").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById('productcategory-status-' + id).checked;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/loai-san-pham/cap-nhat-loai-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, productcategoryname: input }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="productcategory-row-' + id + '">' +
+                            '<td>' + input + '</td>' +
+                            '<td><input type = "checkbox" id = "productcategory-status-' + id + '" onchange = "ChangeStatusProductCategory(\'' + id + '\')" ' + (status == true ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionProductCategory(\'' + id + '\')"><i class="fas fa-edit"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionProductCategory(\'' + id + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableProductCategory').DataTable();
+                        table.row('#productcategory-row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById('name').value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function InsertProductCategory() {
+            var productcategoryname = document.getElementById("productcategoryname").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("productcategorystatus").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/loai-san-pham/them-loai-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productcategoryname: productcategoryname, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="productcategory-row-' + result.productCategory.ProductCategoryID + '">' +
+                            '<td>' + result.productCategory.ProductCategoryName + '</td>' +
+                            '<td><input type = "checkbox" id = "productcategory-status-' + result.productCategory.ProductCategoryID + '" onchange = "ChangeStatusProductCategory(\'' + result.productCategory.ProductCategoryID + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionProductCategory(\'' + result.productCategory.ProductCategoryID + '\')"><i class="fas fa-edit"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionProductCategory(\'' + result.productCategory.ProductCategoryID + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableProductCategory').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById("productcategoryname").value = null;
+                        document.getElementById("productcategorystatus").value = 'true';
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function DeleteProductCategory(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/loai-san-pham/xoa-loai-san-pham",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var table = $('#myTableProductCategory').DataTable();
+                        table.row('#productcategory-row-' + id).remove().draw();
+                        $('#modal-sm').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        $(function () {
+            $('#myTableAge').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTableAge_wrapper .col-md-6:eq(0)');
+        });
+        function InsertAge() {
+            var agename = document.getElementById("agename").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("agestatus").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/do-tuoi/them-do-tuoi",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ agename: agename, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="age-row-' + result.age.AgeID + '">' +
+                            '<td>' + result.age.AgeName + '</td>' +
+                            '<td><input type = "checkbox" id = "age-status-' + result.age.AgeID + '" onchange = "ChangeStatusAge(\'' + result.age.AgeID + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionAge(\'' + result.age.AgeID + '\')"><i class="fas fa-edit"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionAge(\'' + result.age.AgeID + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableAge').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById("agename").value = null;
+                        document.getElementById("agestatus").value = 'true';
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ChangeStatusAge(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/do-tuoi/thay-doi-trang-thai-do-tuoi",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('age-status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+        function GetIdForAnotherFunctionAge(id) {
+            document.getElementById('title-for-modal').innerText = "Thay đổi tên độ tuổi";
+            document.getElementById('update').onclick = function () { UpdateAge(id); };
+            document.getElementById('delete').onclick = function () { DeleteAge(id); };
+        }
+        function UpdateAge(id) {
+            var input = document.getElementById("name").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById('age-status-' + id).checked;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/do-tuoi/cap-nhat-do-tuoi",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, agename: input }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="age-row-' + id + '">' +
+                            '<td>' + input + '</td>' +
+                            '<td><input type = "checkbox" id = "age-status-' + id + '" onchange = "ChangeStatusAge(\'' + id + '\')" ' + (status == true ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-default" onclick="GetIdForAnotherFunctionAge(\'' + id + '\')"><i class="fas fa-edit"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunctionAge(\'' + id + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTableAge').DataTable();
+                        table.row('#age-row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById('name').value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function DeleteAge(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/do-tuoi/xoa-do-tuoi",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var table = $('#myTableAge').DataTable();
+                        table.row('#age-row-' + id).remove().draw();
+                        $('#modal-sm').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+    </script>
+}

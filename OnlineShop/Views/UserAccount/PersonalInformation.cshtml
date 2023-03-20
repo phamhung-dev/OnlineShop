@@ -1,0 +1,629 @@
+﻿@model Model.EF.UserAccount
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Model.EF.ProductOrder> ListHistoryOrder = ViewBag.ListHistoryOrder as List<Model.EF.ProductOrder>;
+}
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Thông tin cá nhân</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Thông tin cá nhân</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Information Area =================-->
+<section class="checkout_area mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 pr-0">
+                <!-- Profile Image -->
+                <div class="card shadow" style="height: 500px;">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <a style="cursor: pointer;" onclick="OpenImageInput()"><img width="231" height="218" id="avatar" class="author_img rounded-circle" src="@(Model.Avatar == null ? "../../Asset/Manager/dist/img/user.png" : "data:image/png;base64, " + Convert.ToBase64String(Model.Avatar))" alt="User profile picture"></a>
+                            <input name="fileUpload" id="fileUpload" accept="images/*" type="file" hidden />
+                        </div>
+                        <h3 id="username" class="profile-username text-center mt-2">@((Model.FirstName + " " + Model.LastName).Trim())</h3>
+                        <p class="text-muted text-center">Khách hàng</p>
+                        <div class="col-md-12">
+                            <b>Email</b> <a class="float-right">@Model.Email</a>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        @if (Model.EmailConfirmed == false)
+                        {
+                            <div class="col-md-12 text-center" id="div-confirm-email">
+                                <a style="line-height: 38px; border-radius: 0px;" href="#!" class="gray_btn" onclick="SendEmailConfirmCode('@Model.UserID')">Xác nhận email</a>
+                            </div>
+                        }
+                        <div class="col-md-12 mt-2 text-center">
+                            <a style="line-height: 38px; border-radius: 0px;" href="#!" class="primary-btn" data-toggle="modal" data-target="#modal-default">Đổi mật khẩu</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-8">
+                <div class="card shadow" style="height: 500px;">
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="form-horizontal">
+                            <div class="form-group row">
+                                <label for="firstname" class="col-sm-2 col-form-label">Họ</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="firstname" placeholder="Họ" value="@Model.FirstName" required maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="lastname" class="col-sm-2 col-form-label">Tên</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="lastname" placeholder="Tên" value="@Model.LastName" required maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="gender" class="col-sm-2 col-form-label">Giới tính</label>
+                                <div class="col-sm-10">
+                                    <select id="gender" class="country_select">
+                                        <option value="1" @(Model.Gender == true ? "selected" : "")>Nam</option>
+                                        <option value="0" @(Model.Gender == false ? "selected" : "")>Nữ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="birthday" class="col-sm-2 col-form-label">Ngày sinh</label>
+                                <div class="col-sm-10">
+                                    <input type="date" class="form-control" id="birthday" value="@Model.Birthday.ToString("yyyy-MM-dd")">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="phone" class="col-sm-2 col-form-label">Điện thoại</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="phone" placeholder="VD: 0898759325" value="@Model.Phone" required maxlength="10">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="address" class="col-sm-2 col-form-label">Địa chỉ</label>
+                                <div class="col-sm-10">
+                                    <textarea class="form-control" id="address" placeholder="Địa chỉ" rows="4" required maxlength="300">@Model.Address</textarea>
+                                </div>
+                            </div>
+                            <div class="offset-sm-2 col-sm-10">
+                                <a style="line-height: 38px; border-radius: 0px;" href="#!" class="primary-btn float-right" onclick="UpdateUserAccount('@Model.UserID')">Lưu</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Information Area =================-->
+<!--================Start History Order Area =================-->
+<section class="checkout_area mt-3 mb-5">
+    <div class="container">
+        <div class="card shadow">
+            <!-- /.card-header -->
+            <div class="card-header bg-white">
+                <h3 style="font-weight: 600" class="card-title">Lịch sử mua hàng</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="myTable" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Ngày đặt</th>
+                                <th>Ngày giao</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var item in ListHistoryOrder)
+                            {
+                                <tr id="row-@item.ProductOrderID">
+                                    <td>@item.ProductOrderID</td>
+                                    <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@(item.ShipDate?.ToString("dd/MM/yyyy"))</td>
+                                    <td>
+                                        @if (item.Status == false)
+                                        {<span class="badge badge-primary">Chờ duyệt</span>}
+                                        else
+                                        {
+                                            if (item.Invoices.FirstOrDefault().Status == false)
+                                            {<span class="badge badge-danger">Đã hủy</span>}
+                                            else
+                                            {
+                                                if (item.Invoices.FirstOrDefault().CustomerConfirm == false)
+                                                {<span class="badge badge-warning">Đang giao</span>}
+                                                else {<span class="badge badge-success">Đã nhận</span>}                                               
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-details" onclick="GetProductOrderDetailById('@item.ProductOrderID')"><i class="lnr lnr-list"></i></a>
+                                        @if (item.Status == true)
+                                        {
+                                            <a id="a-row-@item.ProductOrderID" class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-invoice" onclick="GetInvoiceById('@item.Invoices.FirstOrDefault().InvoiceID', '@item.ProductOrderID', '@item.Invoices.FirstOrDefault().CustomerConfirm.ToString()', '@item.Invoices.FirstOrDefault().Status.ToString()')"><i class="lnr lnr-magnifier"></i></a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</section>
+<!--================End History Order Area =================-->
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header" style="border: none">
+                <h4>Xác nhận</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input class="form-control" type="text" id="enter-code" placeholder="Nhập mã xác nhận" />
+            </div>
+            <div class="modal-footer float-right" style="border: none">
+                <a style="line-height: 38px; border-radius: 0px;" id="confirm" class="primary-btn" href="#!" onclick="ConfirmEmail('@Model.UserID')">Xác nhận</a>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Đổi mật khẩu</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="oldpassword">Mật khẩu cũ</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="oldpassword">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newpassword">Mật khẩu mới</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="newpassword">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="retypenewpassword">Nhập lại mật khẩu mới</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="retypenewpassword">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer float-right">
+                <a class="primary-btn" style="line-height: 38px; border-radius: 0px;" href="#!" onclick="ChangePassword()">Thay đổi</a>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-lg-details">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none;">
+                <h4 class="modal-title">Chi tiết đơn hàng</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productorderdetail">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-lg-invoice">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Hóa đơn</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row d_flex">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <h6 style="border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: bold;">Thông tin hóa đơn</h6>
+                            <p style="color: #777777;">Mã hóa đơn: <span id="invoiceid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Mã p.đặt hàng: <span id="productorderid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Ngày xuất: <span id="exportdate" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Người xuất: <span id="employeeemail" style="color: #000;"></span></p>
+                            <p style="color: #777777;">P.thức thanh toán: <span id="paymentid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Trạng thái: <span id="status" style="color: #fff;"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <h6 style="border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: bold;">Địa chỉ giao hàng</h6>
+                            <p style="color: #777777;">Người đặt: <span id="nameorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Điện thoại: <span id="phoneorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Email: <span id="emailorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Địa chỉ: <span id="addressorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Mã giao dịch: <span id="paymentonlineid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Tổng thanh toán: <span id="totalpayment" style="color: #000;"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productorderdetail-invoice">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer float-right" id="product-received" style="display: none;">
+                <a id="btn-product-received" class="primary-btn" style="line-height: 38px; border-radius: 0px;" href="#!">Đã nhận hàng</a>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+@section scripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#myTable').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": false,
+                "ordering": true,
+                "info": false,
+                order: [[3, 'asc']],
+                'columnDefs': [{
+                    'targets': [4], /* column index */
+                    'orderable': false, /* true or false */
+                }]
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+        });
+        function UpdateUserAccount(id) {
+            var firstname = document.getElementById("firstname").value.replace(/^\s+|\s+$/gm, '');
+            var lastname = document.getElementById("lastname").value.replace(/^\s+|\s+$/gm, '');
+            var gender = document.getElementById("gender").value;
+            var birthday = document.getElementById("birthday").value.replace(/^\s+|\s+$/gm, '');;
+            var phone = document.getElementById("phone").value.replace(/^\s+|\s+$/gm, '');
+            var address = document.getElementById("address").value.replace(/^\s+|\s+$/gm, '');
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("cap-nhat-thong-tin", "UserAccount")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, firstname: firstname, lastname: lastname, gender: gender, birthday: birthday, phone: phone, address: address }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("username").innerText = (firstname + " " + lastname).trim();
+                        document.getElementById("hello-username").innerText = "Xin chào " + (firstname + " " + lastname).trim() + "!";
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function OpenImageInput() {
+            document.getElementById('fileUpload').value = null;
+            $('#fileUpload').trigger('click');
+        }
+        $('#fileUpload').change(function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $('#fileUpload').get(0);
+                var files = fileUpload.files;
+                var formData = new FormData();
+                formData.append('file', files[0]);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: '@Url.Action("cap-nhat-anh-dai-dien", "UserAccount")',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                document.getElementById("avatar").src = "data:image/png;base64, " + result.avatar;
+                                toastr.success(result.message);
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            }
+        });
+        function SendEmailConfirmCode(id) {
+            document.getElementById("enter-code").value = null;
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("gui-ma-xac-nhan-email", "UserAccount")",
+                cache: false,
+                data: { id: id },
+                success: function (result) {
+                    if (result.success) {
+                        $('#modal-sm').modal('show');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ConfirmEmail(id) {
+            var code = document.getElementById("enter-code").value;
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("xac-nhan-email", "UserAccount")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, code: code }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("div-confirm-email").remove();
+                        $('#modal-sm').modal('hide');
+                        document.getElementById("enter-code").value = null;
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ChangePassword() {
+            var oldpassword = document.getElementById("oldpassword").value;
+            var newpassword = document.getElementById("newpassword").value;
+            var retypenewpassword = document.getElementById("retypenewpassword").value;
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("thay-doi-mat-khau", "UserAccount")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ oldpassword: oldpassword, newpassword: newpassword, retypenewpassword: retypenewpassword }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("oldpassword").value = null;
+                        document.getElementById("newpassword").value = null;
+                        document.getElementById("retypenewpassword").value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetProductOrderDetailById(id) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("xem-chi-tiet-phieu-dat-hang", "ProductOrderDetail")",
+                cache: false,
+                data: { id: id },
+                success: function (result) {
+                    if (result.success) {
+                        var total = 0;
+                        var html = '';
+                        for (let i = 0; i < result.listProductOrderDetail.length; i++) {
+                            html += '<tr><td><p>' + result.listProductOrderDetail[i].ProductName + ' ' + result.listProductOrderDetail[i].ColorName + ' ' + result.listProductOrderDetail[i].SizeName + '</p></td>' +
+                                '<td><p>x' + result.listProductOrderDetail[i].Quantity + '</p></td>' +
+                                '<td><p>' + result.listProductOrderDetail[i].Price.toLocaleString().replaceAll('.', ',') + '</p></td>' +
+                                '<td><p>' + result.listProductOrderDetail[i].Payment.toLocaleString().replaceAll('.', ',') + '</p></td></tr>';
+                            total += result.listProductOrderDetail[i].Payment;
+                        }
+                        html += '<tr style="font-weight: bold;"><td></td><td></td><td>Tổng tiền</td><td>' + total.toLocaleString().replaceAll('.', ',') + '</td></tr>';
+                        document.getElementById("productorderdetail").innerHTML = html;
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ConfirmProductReceived(invoiceid, productorderid, invoicestatus) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("xac-nhan-da-nhan-hang", "UserAccount")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ invoiceid: invoiceid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("row-" + productorderid).cells[3].innerHTML = '<span class="badge badge-success">Đã nhận</span>';
+                        document.getElementById("a-row-" + productorderid).setAttribute('onClick', 'javascript: GetInvoiceById(\'' + invoiceid +'\', \'' + productorderid + '\', \'True\', \'' + invoicestatus + '\');');
+                        var rowHTML = document.getElementById("row-" + productorderid).outerHTML;
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + productorderid).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        $('#modal-lg-invoice').modal('hide');
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetInvoiceById(invoiceid, productorderid, customerconfirm, invoicestatus) {
+            if (customerconfirm == 'False' && invoicestatus == 'True') {
+                document.getElementById("product-received").style.display = "flex";
+                document.getElementById("btn-product-received").onclick = function () { ConfirmProductReceived(invoiceid, productorderid, invoicestatus); };
+            }
+            else {
+                document.getElementById("product-received").style.display = "none";
+            }
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("xem-hoa-don", "Invoice")",
+                cache: false,
+                data: { id: invoiceid },
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("invoiceid").innerText = result.invoice.InvoiceID;
+                        document.getElementById("productorderid").innerText = result.invoice.ProductOrderID;
+                        document.getElementById("exportdate").innerText = result.invoice.ExportDate;
+                        document.getElementById("employeeemail").innerText = result.invoice.EmployeeEmail;
+                        document.getElementById("status").innerText = result.invoice.Status;
+                        if (result.invoice.Status == false) {
+                            document.getElementById("status").className = "badge badge-danger";
+                            document.getElementById("status").innerText = "Đã hủy";
+                        }
+                        else {
+                            if (result.invoice.Status == true && result.invoice.CustomerConfirm == false) {
+                                document.getElementById("status").className = "badge badge-warning";
+                                document.getElementById("status").innerText = "Đang giao";
+                            }
+                            else {
+                                document.getElementById("status").className = "badge badge-success";
+                                document.getElementById("status").innerText = "Đã nhận";
+                            }
+                        }
+                        document.getElementById("nameorderer").innerText = result.invoice.NameOrderer;
+                        document.getElementById("phoneorderer").innerText = result.invoice.PhoneOrderer;
+                        document.getElementById("emailorderer").innerText = result.invoice.EmailOrderer;
+                        document.getElementById("addressorderer").innerText = result.invoice.AddressOrderer;
+                        document.getElementById("totalpayment").innerText = result.invoice.TotalPayment.toLocaleString().replaceAll('.', ',');
+                        document.getElementById("paymentid").innerText = result.invoice.PaymentName;
+                        document.getElementById("paymentonlineid").innerText = result.invoice.PaymentOnlineID;
+                        $.ajax({
+                            type: "GET",
+                            url: "@Url.Action("xem-chi-tiet-phieu-dat-hang", "ProductOrderDetail")",
+                            cache: false,
+                            data: { id: productorderid },
+                            success: function (result) {
+                                if (result.success) {
+                                    var total = 0;
+                                    var html = '';
+                                    for (let i = 0; i < result.listProductOrderDetail.length; i++) {
+                                        html += '<tr><td><p>' + result.listProductOrderDetail[i].ProductName + ' ' + result.listProductOrderDetail[i].ColorName + ' ' + result.listProductOrderDetail[i].SizeName + '</p></td>' +
+                                            '<td><p>x' + result.listProductOrderDetail[i].Quantity + '</p></td>' +
+                                            '<td><p>' + result.listProductOrderDetail[i].Price.toLocaleString().replaceAll('.', ',') + '</p></td>' +
+                                            '<td><p>' + result.listProductOrderDetail[i].Payment.toLocaleString().replaceAll('.', ',') + '</p></td></tr>';
+                                        total += result.listProductOrderDetail[i].Payment;
+                                    }
+                                    html += '<tr style="font-weight: bold;"><td></td><td></td><td>Tổng tiền</td><td>' + total.toLocaleString().replaceAll('.', ',') + '</td></tr>';
+                                    document.getElementById("productorderdetail-invoice").innerHTML = html;
+                                }
+                                else {
+                                    toastr.error(result.message);
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+    </script>
+}

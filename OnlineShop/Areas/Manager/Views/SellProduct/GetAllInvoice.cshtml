@@ -1,0 +1,325 @@
+﻿@model IEnumerable<Model.EF.Invoice>
+@{
+    ViewBag.Title = "Danh sách hóa đơn";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+
+<div class="card card-outline card-olive">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách hóa đơn</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="myTable" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ngày xuất</th>
+                    <th>Tổng tiền</th>
+                    <th>Người xuất</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.InvoiceID">
+                        <td>@item.InvoiceID</td>
+                        <td>@item.ExportDate.ToString("dd/MM/yyyy")</td>
+                        <td>@String.Format("{0:0,0}", item.TotalPayment)</td>
+                        <td><a id="email-row-@item.InvoiceID" href="mailto:@item.EmployeeAccount.Email">@item.EmployeeAccount.Email</a></td>
+                        <td id="status-row-@item.InvoiceID">
+                            @if (item.Status == false)
+                            {<span class="badge badge-danger">Đã hủy</span>}
+                            else
+                            {if (item.Status == true && item.CustomerConfirm == false)
+                                {<span class="badge badge-warning">Đang giao</span>}
+                                else
+                                {<span class="badge badge-success">Đã nhận</span>}
+                            }
+                        </td>
+                        <td id="action-row-@item.InvoiceID">
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetInvoiceById('@item.InvoiceID', '@item.ProductOrderID')"><i class="fas fa-eye"></i></a>
+                            @if (item.Status == true && item.CustomerConfirm == false)
+                            {
+                                <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunction('@item.InvoiceID')"><i class="fas fa-ban"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ngày xuất</th>
+                    <th>Tổng tiền</th>
+                    <th>Người xuất</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn hủy hóa đơn này không?
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Không</button>
+                <button id="cancel" type="button" class="btn btn-primary">Có</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-lg">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Hóa đơn</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row d_flex">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <h6 style="border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: bold;">Thông tin hóa đơn</h6>
+                            <p style="color: #777777;">Mã hóa đơn: <span id="invoiceid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Mã p.đặt hàng: <span id="productorderid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Ngày xuất: <span id="exportdate" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Người xuất: <span id="employeeemail" style="color: #000;"></span></p>
+                            <p style="color: #777777;">P.thức thanh toán: <span id="paymentid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Trạng thái: <span id="status" style="color: #fff;"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <h6 style="border-bottom: 1px solid #eee; padding-bottom: 12px; font-weight: bold;">Địa chỉ giao hàng</h6>
+                            <p style="color: #777777;">Người đặt: <span id="nameorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Điện thoại: <span id="phoneorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Email: <span id="emailorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Địa chỉ: <span id="addressorderer" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Mã giao dịch: <span id="paymentonlineid" style="color: #000;"></span></p>
+                            <p style="color: #777777;">Tổng thanh toán: <span id="totalpayment" style="color: #000;"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productorderdetail">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <!-- Page specific script -->
+    <script>
+        $(function () {
+            $('#myTable').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+                order: [[4, 'asc']],
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+        });
+        function GetIdForAnotherFunction(id) {
+            document.getElementById("cancel").onclick = function () { CancelInvoice(id) };
+        }
+        function CancelInvoice(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/hoa-don/huy-hoa-don",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("email-row-" + id).href = "mailto:" + result.employeeEmail;
+                        document.getElementById("email-row-" + id).innerText = result.employeeEmail;
+                        document.getElementById("status-row-" + id).innerHTML = '<span class="badge badge-danger">Đã hủy</span>';
+                        document.getElementById("action-row-" + id).innerHTML = '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetInvoiceById(\'' + id + '\')"><i class="fas fa-eye"></i></a>';
+                        var rowHTML = document.getElementById("row-" + id).outerHTML;
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        $('#modal-sm').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function ClearInfo() {
+            document.getElementById("invoiceid").innerText = "";
+            document.getElementById("productorderid").innerText = "";
+            document.getElementById("exportdate").innerText = "";
+            document.getElementById("employeeemail").innerText = "";
+            document.getElementById("status").innerText = "";
+            document.getElementById("status").className = "";
+            document.getElementById("status").innerText = "";
+            document.getElementById("nameorderer").innerText = "";
+            document.getElementById("phoneorderer").innerText = "";
+            document.getElementById("emailorderer").innerText = "";
+            document.getElementById("addressorderer").innerText = "";
+            document.getElementById("totalpayment").innerText = "";
+            document.getElementById("productorderdetail").innerHTML = "";
+        }
+        function GetInvoiceById(invoiceid, productorderid) {
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/hoa-don/xem-hoa-don",
+                cache: false,
+                data: { id: invoiceid },
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("invoiceid").innerText = result.invoice.InvoiceID;
+                        document.getElementById("productorderid").innerText = result.invoice.ProductOrderID;
+                        document.getElementById("exportdate").innerText = result.invoice.ExportDate;
+                        document.getElementById("employeeemail").innerText = result.invoice.EmployeeEmail;
+                        document.getElementById("status").innerText = result.invoice.Status;
+                        if (result.invoice.Status == false)
+                        {
+                            document.getElementById("status").className = "badge badge-danger";
+                            document.getElementById("status").innerText = "Đã hủy";
+                        }
+                        else
+                        {
+                            if (result.invoice.Status == true && result.invoice.CustomerConfirm == false)
+                            {
+                                document.getElementById("status").className = "badge badge-warning";
+                                document.getElementById("status").innerText = "Đang giao";
+                            }
+                            else
+                            {
+                                document.getElementById("status").className = "badge badge-success";
+                                document.getElementById("status").innerText = "Đã nhận";
+                            }
+                        }
+                        document.getElementById("nameorderer").innerText = result.invoice.NameOrderer;
+                        document.getElementById("phoneorderer").innerText = result.invoice.PhoneOrderer;
+                        document.getElementById("emailorderer").innerText = result.invoice.EmailOrderer;
+                        document.getElementById("addressorderer").innerText = result.invoice.AddressOrderer;
+                        document.getElementById("totalpayment").innerText = result.invoice.TotalPayment.toLocaleString().replaceAll('.', ',');
+                        document.getElementById("paymentid").innerText = result.invoice.PaymentName;
+                        document.getElementById("paymentonlineid").innerText = result.invoice.PaymentOnlineID;
+                        GetProductOrderDetailById(productorderid);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetProductOrderDetailById(id) {
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/chi-tiet-phieu-dat-hang/xem-chi-tiet-phieu-dat-hang",
+                cache: false,
+                data: { id: id },
+                success: function (result) {
+                    if (result.success) {
+                        var html = '';
+                        for (let i = 0; i < result.listProductOrderDetail.length; i++) {
+                            html += '<tr><td><p>' + result.listProductOrderDetail[i].ProductName + ' ' + result.listProductOrderDetail[i].ColorName + ' ' + result.listProductOrderDetail[i].SizeName + '</p></td>' +
+                                '<td><p>x' + result.listProductOrderDetail[i].Quantity + '</p></td>' +
+                                '<td><p>' + result.listProductOrderDetail[i].Price.toLocaleString().replaceAll('.', ',') + '</p></td>' +
+                                '<td><p>' + result.listProductOrderDetail[i].Payment.toLocaleString().replaceAll('.', ',') + '</p></td></tr>';
+                        }
+                        document.getElementById("productorderdetail").innerHTML = html;
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,205 @@
+﻿@model Model.EF.EmployeeAccount
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<div class="row">
+    <div class="col-md-4">
+        <!-- Profile Image -->
+        <div class="card card-olive card-outline" style="height: 369px;">
+            <div class="card-body box-profile">
+                <div class="text-center">
+                    <a style="cursor: pointer;" onclick="OpenImageInput()"><img id="avatar" class="profile-user-img img-fluid img-circle" src="@(Model.Avatar == null ? "../../Asset/Manager/dist/img/user.png" : "data:image/png;base64, " + Convert.ToBase64String(Model.Avatar))" alt="User profile picture"></a>
+                    <input name="fileUpload" id="fileUpload" accept="images/*" type="file" hidden />
+                </div>
+
+                <h3 id="username" class="profile-username text-center">@((Model.FirstName + " " + Model.LastName).Trim())</h3>
+
+                <p class="text-muted text-center">@(Model.Role == 1 ? "Quản lý" : "Nhân viên")</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                    <li class="list-group-item">
+                        <b>Email</b> <a class="float-right">@Model.Email</a>
+                    </li>
+                </ul>
+
+                <a data-toggle="modal" data-target="#modal-default" class="btn btn-primary btn-block"><b>Quản lý mật khẩu</b></a>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <div class="col-md-8">
+        <div class="card card-outline card-olive">
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="form-horizontal">
+                    <div class="form-group row">
+                        <label for="firstname" class="col-sm-2 col-form-label">Họ</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="firstname" placeholder="Họ" value="@Model.FirstName">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="lastname" class="col-sm-2 col-form-label">Tên</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="lastname" placeholder="Tên" value="@Model.LastName">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="phone" class="col-sm-2 col-form-label">Điện thoại</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="phone" placeholder="VD: 0898759325" value="@Model.Phone">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="address" class="col-sm-2 col-form-label">Địa chỉ</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="address" placeholder="Địa chỉ" rows="4">@Model.Address</textarea>
+                        </div>
+                    </div>
+                    <div class="offset-sm-2 col-sm-10">
+                        <a class="btn btn-primary float-right" onclick="UpdateEmployee('@Model.EmployeeID')">Lưu</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header card-outline card-olive">
+                <h4 class="modal-title">Quản lý mật khẩu</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="oldpassword">Mật khẩu cũ</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="oldpassword">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newpassword">Mật khẩu mới</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="newpassword">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="retypenewpassword">Nhập lại mật khẩu mới</label>
+                    <div class="input-group-prepend">
+                        <input type="password" class="form-control" id="retypenewpassword">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="ChangePassword()">Thay đổi</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section DataTablesScripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+    <script>
+        function UpdateEmployee(id) {
+            var firstname = document.getElementById("firstname").value.replace(/^\s+|\s+$/gm, '');
+            var lastname = document.getElementById("lastname").value.replace(/^\s+|\s+$/gm, '');
+            var phone = document.getElementById("phone").value.replace(/^\s+|\s+$/gm, '');
+            var address = document.getElementById("address").value.replace(/^\s+|\s+$/gm, '');
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nhan-vien/cap-nhat-thong-tin",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, firstname: firstname, lastname: lastname, phone: phone, address: address }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("username").innerText = (firstname + " " + lastname).trim();
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function OpenImageInput() {
+            document.getElementById('fileUpload').value = null;
+            $('#fileUpload').trigger('click');
+        }
+        $('#fileUpload').change(function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $('#fileUpload').get(0);
+                var files = fileUpload.files;
+                var formData = new FormData();
+                formData.append('file', files[0]);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: '/admin/quan-ly/nhan-vien/cap-nhat-anh-dai-dien',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                document.getElementById("avatar").src = "data:image/png;base64, " + result.avatar;
+                                document.getElementById("avatar-sidebar").src = "data:image/png;base64, " + result.avatar;
+                                toastr.success(result.message);
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            }
+        });
+        function ChangePassword() {
+            var oldpassword = document.getElementById("oldpassword").value;
+            var newpassword = document.getElementById("newpassword").value;
+            var retypenewpassword = document.getElementById("retypenewpassword").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nhan-vien/thay-doi-mat-khau",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ oldpassword: oldpassword, newpassword: newpassword, retypenewpassword: retypenewpassword }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("oldpassword").value = null;
+                        document.getElementById("newpassword").value = null;
+                        document.getElementById("retypenewpassword").value = null;
+                        $('#modal-default').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+

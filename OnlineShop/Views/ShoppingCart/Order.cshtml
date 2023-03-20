@@ -1,0 +1,186 @@
+﻿@model List<Model.EF.ShoppingCart>
+@{
+    ViewBag.Title = "Thanh toán đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Model.EF.Payment> ListPayment = ViewBag.ListPayment as List<Model.EF.Payment>;
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Thanh toán đơn hàng</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#!" data-toggle="modal" data-target="#modal-lg">Giỏ hàng<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Thanh toán đơn hàng</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Order Details Area =================-->
+<section class="order_details section_gap">
+    <div class="container" id="content">
+        @if (Model != null)
+        {
+            <h2 class="text-center">Đơn hàng của bạn</h2>
+            <div class="row order_d_inner">
+                <div class="col-lg-6">
+                    <div class="details_item">
+                        <h4>Thông tin đơn hàng</h4>
+                        <ul class="list">
+                            <li><a href="#!"><span>Mã</span> : @ViewBag.ProductOrderID</a></li>
+                            <li><a href="#!"><span>Ngày đặt</span> : @DateTime.Now.ToString("dd-MM-yyyy")</a></li>
+                            <li><a href="#!"><span>Tổng tiền</span> : @String.Format("{0:0,0}", Model.Sum(x => ((double)x.Stock.Product.UnitSellPrice) * (1 - x.Stock.Product.DiscountPercent / 100) * x.Quantity))</a></li>
+                            <li>
+                                <div style="width: 100%" class="mb-2">
+                                    <a href="#!"><span>P.thức thanh toán</span> :</a>
+                                </div>                              
+                                <select id="payments" class="country_select">
+                                    @foreach (var item in ListPayment)
+                                    {
+                                        <option value="@item.PaymentID">@item.PaymentName</option>
+                                    }
+                                </select>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="details_item">
+                        <h4>Địa chỉ giao hàng</h4>
+                        <ul class="list">
+                            <li><a href="#!"><span>Tên</span> : @(((Session["CustomerCurrent"] as Model.EF.UserAccount).FirstName + " " + (Session["CustomerCurrent"] as Model.EF.UserAccount).LastName).Trim())</a></li>
+                            <li><a href="#!"><span>Email</span> : @((Session["CustomerCurrent"] as Model.EF.UserAccount).Email)</a></li>
+                            <li><a href="#!"><span>Điện thoại</span> : @((Session["CustomerCurrent"] as Model.EF.UserAccount).Phone)</a></li>
+                            <li><a href="#!"><span>Địa chỉ</span> : @((Session["CustomerCurrent"] as Model.EF.UserAccount).Address)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="order_details_table">
+                <h2>Chi tiết đơn hàng</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <p>@((item.Stock.Product.ProductName + " " + item.Stock.Size.SizeName + " " + item.Stock.Color.ColorName).Trim())</p>
+                                    </td>
+                                    <td>
+                                        <p>@String.Format("{0:0,0}", ((double)item.Stock.Product.UnitSellPrice) * (1 - item.Stock.Product.DiscountPercent / 100))</p>
+                                    </td>
+                                    <td>
+                                        <h6>x @item.Quantity</h6>
+                                    </td>
+                                    <td>
+                                        <p>@String.Format("{0:0,0}", ((double)item.Stock.Product.UnitSellPrice) * (1 - item.Stock.Product.DiscountPercent / 100) * item.Quantity)</p>
+                                    </td>
+                                </tr>
+                            }
+                            <tr>
+                                <td>Tổng tiền</td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <h6>@String.Format("{0:0,0}", Model.Sum(x => ((double)x.Stock.Product.UnitSellPrice) * (1 - x.Stock.Product.DiscountPercent / 100) * x.Quantity))</h6>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="float-right mt-3">
+                <a style="line-height: 38px; border-radius: 0px;" href="#!" class="primary-btn" onclick="CheckPayments('@ViewBag.ProductOrderID')">Xác nhận</a>
+            </div>
+        }
+        else
+        {
+            <label>Hiện chưa có sản phẩm nào trong giỏ hàng của bạn.</label>
+            <a class="gray_btn" href="@Url.Action("trang-chu", "Main")">Mua hàng</a>
+        }
+    </div>
+</section>
+<!--================End Order Details Area =================-->
+@section scripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+    <script>
+        $(function () {
+            var lstInput = document.getElementsByName("input-quantity");
+            for (let i = 0; i < lstInput.length; i++) {
+                lstInput[i].disabled = true;
+            }
+            var lstA = document.getElementsByName("a-remove");
+            for (let i = 0; i < lstA.length; i++) {
+                lstA[i].onclick = null;
+                lstA[i].style.cursor = "not-allowed";
+            }
+        });
+        function CheckPayments(productorderid) {
+            var payments = document.getElementById("payments").value;
+            if (payments == 'COD') {
+                PaymentCOD(productorderid);
+            }
+            else {
+                if (payments == 'ONLINE') {
+                    PaymentOnline(productorderid);
+                }
+            }
+        }
+        function PaymentOnline(productorderid) {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("thanh-toan-truc-tuyen", "ShoppingCart")",
+                cache: false,
+                data: { productorderid: productorderid },
+                success: function (result) {
+                    if (result.success) {
+                        window.location.href = result.paymentUrl;
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function PaymentCOD(productorderid) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("thanh-toan-khi-nhan-hang","ShoppingCart")",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ productorderid: productorderid }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    window.location.href = result.url;
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    </script>
+}

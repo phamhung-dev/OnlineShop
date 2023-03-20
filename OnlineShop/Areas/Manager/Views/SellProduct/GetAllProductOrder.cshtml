@@ -1,0 +1,307 @@
+﻿@model IEnumerable<Model.EF.ProductOrder>
+@{
+    ViewBag.Title = "Danh sách phiếu đặt hàng";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+
+<div class="card card-outline card-olive">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách phiếu đặt hàng</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="myTable" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ngày đặt</th>
+                    <th>Ngày giao</th>
+                    <th>Người đặt</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.ProductOrderID">
+                        <td>@item.ProductOrderID</td>
+                        <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
+                        <td id="shipdate-row-@item.ProductOrderID">@(item.ShipDate?.ToString("dd/MM/yyyy"))</td>
+                        <td>
+                            @item.UserAccount.FirstName@if (!string.IsNullOrEmpty(item.UserAccount.FirstName) && !string.IsNullOrEmpty(item.UserAccount.LastName))
+                            {<label>&nbsp;</label>}@item.UserAccount.LastName<br />
+                            <a id="phone-row-@item.ProductOrderID" href="tel:@item.UserAccount.Phone">Điện thoại: @item.UserAccount.Phone</a><br />
+                            <a id="email-row-@item.ProductOrderID" href="mailto:@item.UserAccount.Email">Email: @item.UserAccount.Email</a><br />
+                            <label style="font-weight: normal">Địa chỉ: @item.UserAccount.Address</label>
+                        </td>
+                        <td id="status-row-@item.ProductOrderID">
+                            @if (item.Status == false)
+                            {<span class="badge badge-warning">Đang chờ</span>}
+                            else
+                            {<span class="badge badge-primary">Đã duyệt</span>}
+                    </td>
+                    <td id="action-row-@item.ProductOrderID">
+                        <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetProductOrderDetailById('@item.ProductOrderID')"><i class="fas fa-eye"></i></a>
+                        @if (item.Status == false)
+                        {
+                            <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunction('@item.ProductOrderID')"><i class="fas fa-check"></i></a>
+                            <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm-delete" onclick="GetIdForAnotherFunction('@item.ProductOrderID')"><i class="fas fa-trash-alt"></i></a>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ngày đặt</th>
+                    <th>Ngày giao</th>
+                    <th>Người đặt</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn ngày giao hàng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input id="shipdate" type="date" class="form-control float-right" >
+                    </div>
+                    <!-- /.input group -->
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button id="browsing" type="button" class="btn btn-primary">Đồng ý</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<div class="modal fade" id="modal-sm-delete">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa không?
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Không</button>
+                <button id="delete" type="button" class="btn btn-primary">Có</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<div class="modal fade" id="modal-lg">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header" style="border-bottom: none;">
+                <h4 class="modal-title">Chi tiết phiếu đặt hàng</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <p style="color: #777777;">P.thức thanh toán: <span id="paymentid" style="color: #000;"></span></p>
+                        <p style="color: #777777;">Mã giao dịch: <span id="paymentonlineid" style="color: #000;"></span></p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Giá</th>
+                                <th scope="col">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productorderdetail">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <!-- Page specific script -->
+    <script>
+        $(function () {
+            $('#myTable').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+                order: [[4, 'asc']],
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+        });
+        function GetIdForAnotherFunction(id) {
+            document.getElementById("browsing").onclick = function () { Browsing(id); };
+            document.getElementById("delete").onclick = function () { DeleteProductOrder(id) };
+        }
+        function ChangeFormateDate(oldDate) {
+            return oldDate.toString().split("/").reverse().join("/");
+        }
+        function Browsing(id) {
+            var shipdate = document.getElementById("shipdate").value.replace(/^\s+|\s+$/gm, '');
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/phieu-dat-hang/duyet-phieu-dat-hang",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productorderid: id, shipdate: shipdate }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById("shipdate-row-" + id).innerText = ChangeFormateDate(shipdate.toString().replaceAll('-', '/'));
+                        document.getElementById("status-row-" + id).innerHTML = '<span class="badge badge-primary">Đã duyệt</span>';
+                        document.getElementById("action-row-" + id).innerHTML = '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetProductOrderDetailById(\'' + id + '\')"><i class="fas fa-eye"></i></a>';
+                        var rowHTML = document.getElementById("row-" + id).outerHTML;
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        document.getElementById("shipdate").value = null;
+                        $('#modal-sm').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function DeleteProductOrder(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/phieu-dat-hang/xoa-phieu-dat-hang",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        $('#modal-sm-delete').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetProductOrderDetailById(id) {
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/chi-tiet-phieu-dat-hang/xem-chi-tiet-phieu-dat-hang",
+                cache: false,
+                data: { id: id },
+                success: function (result) {
+                    if (result.success) {
+                        var html = '';
+                        var totalPayment = 0;
+                        for (let i = 0; i < result.listProductOrderDetail.length; i++) {
+                            html += '<tr><td><p>' + result.listProductOrderDetail[i].ProductName + ' ' + result.listProductOrderDetail[i].ColorName + ' ' + result.listProductOrderDetail[i].SizeName + '</p></td>' +
+                                    '<td><p>x' + result.listProductOrderDetail[i].Quantity + '</p></td>' +
+                                    '<td><p>' + result.listProductOrderDetail[i].Price.toLocaleString().replaceAll('.', ',') + '</p></td>' +
+                                    '<td><p>' + result.listProductOrderDetail[i].Payment.toLocaleString().replaceAll('.', ',') + '</p></td></tr>';
+                            totalPayment += result.listProductOrderDetail[i].Payment;
+                        }
+                        html += '<tr><td></td><td></td><td style="font-weight:bold;">Tổng tiền</td><td style="font-weight:bold;">' + totalPayment.toLocaleString().replaceAll('.',',') + '</td></tr>'
+                        document.getElementById("productorderdetail").innerHTML = html;
+                        document.getElementById("paymentid").innerText = result.payment.PaymentName;
+                        document.getElementById("paymentonlineid").innerText = result.payment.PaymentOnlineID;
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+    </script>
+}

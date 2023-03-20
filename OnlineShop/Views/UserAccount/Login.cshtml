@@ -1,0 +1,74 @@
+﻿@using CaptchaMvc.HtmlHelpers;
+@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Đăng nhập</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Đăng nhập</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Login Box Area =================-->
+<section class="login_box_area section_gap">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="login_box_img">
+                    <img class="img-fluid" src="~/Asset/User/dist/img/login.jpg" alt="">
+                    <div class="hover">
+                        <h4>Bạn chưa có tài khoản?</h4>
+                        <p>Đăng ký tài khoản ngay để có thể mua hàng và hưởng nhiều ưu đãi.</p>
+                        <a class="primary-btn" href="@Url.Action("dang-ky","UserAccount")">Tạo tài khoản</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="login_form_inner">
+                    <h2>Đăng nhập</h2>
+                    @using (Html.BeginForm("dang-nhap", "UserAccount", FormMethod.Post, new { @class = "row login_form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="col-md-12 form-group">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required maxlength="254">
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                        </div>
+                        <div class="col-md-12 form-group text-danger">
+                            @ViewBag.LoginFailed
+                        </div>
+                        <div class="col-md-12 form-group mb-0">
+                            @Html.MathCaptcha("Đổi lại", "Câu trả lời")
+                        </div>
+                        <div class="col-md-12 form-group text-danger mb-3">
+                            @ViewBag.ErrorMessage
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <button type="submit" value="submit" class="primary-btn">Đăng nhập</button>
+                            <a href="@Url.Action("quen-mat-khau","UserAccount")">Quên mật khẩu?</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Login Box Area =================-->
+<script>
+    $(function () {
+        document.getElementById("CaptchaInputText").classList.add("mb-2");
+        document.getElementById("CaptchaImage").classList.add("mb-2");
+    });
+</script>
+

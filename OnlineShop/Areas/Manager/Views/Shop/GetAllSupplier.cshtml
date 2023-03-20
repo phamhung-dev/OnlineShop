@@ -1,0 +1,491 @@
+﻿
+@model IEnumerable<Model.EF.Supplier>
+@{
+    ViewBag.Title = "Danh sách nhà cung cấp";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+}
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<div class="card card-outline card-olive">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách nhà cung cấp</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <button type="button" class="btn btn-primary mb-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg-insert" onclick="ClearSupplierInfo()"><i class="fas fa-plus"></i> Thêm NCC</button>
+        <table id="myTable" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã NCC</th>
+                    <th>Tên NCC</th>
+                    <th>Ngày hợp tác</th>
+                    <th>Điện thoại</th>
+                    <th>Email</th>
+                    <th>Đang hợp tác</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.SupplierID">
+                        <td>@item.SupplierID</td>
+                        <td>@item.SupplierName</td>
+                        <td>@item.ContractDate.ToString("dd/MM/yyyy")</td>
+                        <td><a id="phone-row-@item.SupplierID" href="tel:@item.Phone">@item.Phone</a></td>
+                        <td><a id="email-row-@item.SupplierID" href="mailto:@item.Email">@item.Email</a></td>
+                        <td>@Html.CheckBoxFor(modelItem => item.Status, new { @id = "status-" + item.SupplierID, @onchange = "ChangeStatusSupplier('" + item.SupplierID + "')" })</td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetSupplierById('@item.SupplierID');"><i class="fas fa-eye"></i></a>
+                            <a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunction('@item.SupplierID')"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã NCC</th>
+                    <th>Tên NCC</th>
+                    <th>Ngày hợp tác</th>
+                    <th>Điện thoại</th>
+                    <th>Email</th>
+                    <th>Đang hợp tác</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg-insert">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thêm nhà cung cấp mới</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--SupplierID-->
+                <div class="form-group">
+                    <label>Mã NCC</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-barcode" style="width:18px;"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Mã NCC" id="insert-supplierid" required maxlength="7"/>
+                    </div>
+                </div>
+                <!--SupplierName-->
+                <div class="form-group">
+                    <label>Tên NCC</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-id-card-alt" style="width:18px;"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Tên NCC" id="insert-suppliername" required maxlength="300" />
+                    </div>
+                </div>
+                <!-- ContractDate -->
+                <div class="form-group">
+                    <label>Ngày hợp tác</label>
+                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fas fa-calendar-day" style="width:18px;"></i></div>
+                        </div>
+                        <input id="insert-contractdate" type="text" class="form-control datetimepicker-input" placeholder="Ngày hợp tác" data-target="#reservationdate" onkeydown="return false" required />
+                    </div>
+                </div>
+                <!-- Phone -->
+                <div class="form-group">
+                    <label>Điện thoại</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-phone" style="width:18px;"></i></span>
+                        </div>
+                        <input id="insert-phone" type="text" class="form-control" placeholder="Điện thoại" data-inputmask='"mask": "(999) 999-9999"' data-mask required />
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <!--Email-->
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope" style="width:18px;"></i></span>
+                        </div>
+                        <input id="insert-email" type="email" class="form-control" placeholder="Email" required maxlength="254" />
+                    </div>
+                </div>
+
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="insert-status" class="form-control">
+                            <option value="true">Đang hợp tác</option>
+                            <option value="false">Ngừng hợp tác</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="insertSupplier" type="button" class="btn btn-primary" onclick="InsertSupplier()">Thêm</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 id="supplierid" class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--SupplierName-->
+                <div class="form-group">
+                    <label>Tên NCC</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-id-card-alt" style="width:18px;"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Tên NCC" id="suppliername" required maxlength="300" />
+                    </div>
+                </div>
+                <!-- ContractDate -->
+                <div class="form-group">
+                    <label>Ngày hợp tác</label>
+                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fas fa-calendar-day" style="width:18px;"></i></div>
+                        </div>
+                        <input id="contractdate" type="text" class="form-control datetimepicker-input" placeholder="Ngày hợp tác" data-target="#reservationdate" onkeydown="return false" required />
+                    </div>
+                </div>
+                <!-- Phone -->
+                <div class="form-group">
+                    <label>Điện thoại</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-phone" style="width:18px;"></i></span>
+                        </div>
+                        <input id="phone" type="text" class="form-control" placeholder="Điện thoại" data-inputmask='"mask": "(999) 999-9999"' data-mask required />
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <!--Email-->
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope" style="width:18px;"></i></span>
+                        </div>
+                        <input id="email" type="email" class="form-control" placeholder="Email" required maxlength="254" />
+                    </div>
+                </div>
+
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="status" class="form-control">
+                            <option value="true">Đang hợp tác</option>
+                            <option value="false">Ngừng hợp tác</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="updateSupplier" type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa nhà cung cấp này không?
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Không</button>
+                <button id="deleteSupplier" type="button" class="btn btn-primary">Có</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <!-- InputMask -->
+    <script src="~/Asset/Manager/plugins/moment/moment.min.js"></script>
+    <script src="~/Asset/Manager/plugins/inputmask/jquery.inputmask.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <!-- Page specific script -->
+    <script>
+        $(function () {
+            $('#myTable').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+
+            //Money Euro
+            $('[data-mask]').inputmask()
+
+            //Date picker
+            $('#reservationdate').datetimepicker({
+                format: 'DD/MM/yyyy',
+            });
+        });
+
+        function ConvertTimestampToDate(ts) {
+            var date = new Date(parseInt(ts));
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+            return (day < 10 ? "0" + day : day) + "/" + (month < 10 ? "0" + month : month) + "/" + year;
+        }
+
+        function ChangeStatusSupplier(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nha-cung-cap/thay-doi-trang-thai-nha-cung-cap",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+
+        function UpdateSupplier(id) {
+            var suppliername = document.getElementById("suppliername").value.replace(/^\s+|\s+$/gm, '');
+            var contractdate = document.getElementById("contractdate").value.replace(/^\s+|\s+$/gm, '');
+            var phone = document.getElementById("phone").value.replace(/^\s+|\s+$/gm, '');
+            var email = document.getElementById("email").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("status").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nha-cung-cap/cap-nhat-nha-cung-cap",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, suppliername: suppliername, contractdate: contractdate, phone: phone, email: email, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + id + '">' +
+                            '<td>' + id + '</td>' +
+                            '<td>' + suppliername + '</td>' +
+                            '<td>' + contractdate + '</td>' +
+                            '<td><a id="phone-row-' + id + '" href="tel:' + phone.replace(/\D/g, '') + '">' + phone.replace(/\D/g, '') + '</a></td>' +
+                            '<td><a id="email-row-' + id + '" href="mailto:' + email + '">' + email + '</a></td>' +
+                            '<td><input type = "checkbox" id = "status-' + id + '" onchange = "ChangeStatusSupplier(\'' + id + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetSupplierById(\'' + id + '\');"><i class="fas fa-eye"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunction(\'' + id + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+
+        function GetSupplierById(id) {
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/nha-cung-cap/xem-nha-cung-cap",
+                cache: false,
+                data: { id: id },
+                success: function (supplier) {
+                    document.getElementById("supplierid").innerText = "Thông tin nhà cung cấp - Mã NCC: " + supplier.SupplierID;
+                    document.getElementById("suppliername").value = supplier.SupplierName;
+                    document.getElementById("contractdate").value = ConvertTimestampToDate(supplier.ContractDate.match(/\d+/)[0])
+                    document.getElementById("phone").value = supplier.Phone;
+                    document.getElementById("email").value = supplier.Email;
+                    document.getElementById("status").value = supplier.Status;
+                    document.getElementById("updateSupplier").onclick = function () { UpdateSupplier(supplier.SupplierID); };
+                }
+            });
+        }
+        function ClearSupplierInfo() {
+            document.getElementById("insert-supplierid").value = null;
+            document.getElementById("insert-suppliername").value = null;
+            document.getElementById("insert-contractdate").value = null;
+            document.getElementById("insert-phone").value = '';
+            document.getElementById("insert-email").value = '';
+            document.getElementById("insert-status").value = 'true';
+        }
+        function InsertSupplier() {
+            var supplierid = document.getElementById("insert-supplierid").value.replace(/^\s+|\s+$/gm, '');
+            var suppliername = document.getElementById("insert-suppliername").value.replace(/^\s+|\s+$/gm, '');
+            var contractdate = document.getElementById("insert-contractdate").value.replace(/^\s+|\s+$/gm, '');
+            var phone = document.getElementById("insert-phone").value.replace(/^\s+|\s+$/gm, '');
+            var email = document.getElementById("insert-email").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("insert-status").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nha-cung-cap/them-nha-cung-cap",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ supplierid: supplierid, suppliername: suppliername, contractdate: contractdate, phone: phone, email: email, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + supplierid + '">' +
+                            '<td>' + supplierid + '</td>' +
+                            '<td>' + suppliername + '</td>' +
+                            '<td>' + contractdate + '</td>' +
+                            '<td><a id="phone-row-' + supplierid + '" href="tel:' + phone.replace(/\D/g, '') + '">' + phone.replace(/\D/g, '') + '</a></td>' +
+                            '<td><a id="email-row-' + supplierid + '" href="mailto:' + email + '">' + email + '</a></td>' +
+                            '<td><input type = "checkbox" id = "status-' + supplierid + '" onchange = "ChangeStatusSupplier(\'' + supplierid + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetSupplierById(\'' + supplierid + '\');"><i class="fas fa-eye"></i></a>' +
+                            '<a class="note-btn-primary ml-2" style="cursor: pointer" data-toggle="modal" data-target="#modal-sm" onclick="GetIdForAnotherFunction(\'' + supplierid + '\')"><i class="fas fa-trash-alt"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTable').DataTable();
+                        table.rows.add($(rowHTML)).draw();
+                        ClearSupplierInfo();
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function GetIdForAnotherFunction(id) {
+            document.getElementById('deleteSupplier').onclick = function () { DeleteSupplier(id); };
+        }
+        function DeleteSupplier(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/nha-cung-cap/xoa-nha-cung-cap",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id}),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        $('#modal-sm').modal('hide');
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+
+
+
+

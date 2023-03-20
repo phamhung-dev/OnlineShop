@@ -1,0 +1,203 @@
+﻿@model List<Model.EF.Product>
+@{
+    ViewBag.Title = "Kết quả đặt hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Kết quả đặt hàng</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#!" data-toggle="modal" data-target="#modal-lg">Giỏ hàng<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#!" data-toggle="modal" data-target="#modal-lg">Thanh toán đơn hàng<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#!">Kết quả đặt hàng</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Order Details Area =================-->
+<section class="order_details section_gap pb-0 pt-5">
+    <div class="container" id="content">
+        @if (ViewBag.Payment == "ONLINE")
+        {
+            if (ViewBag.IsPaymentSuccess)
+            {
+                <h2 class="title_confirmation mb-4">@ViewBag.PaymentResult<br />Đặt hàng thành công. Bạn vui lòng chờ email hoặc điện thoại xác nhận từ cửa hàng. Trân trọng cảm ơn!</h2>
+            }
+            else
+            {
+                <h2 class="text-danger mb-4">@ViewBag.PaymentResult<br />Đặt hàng thất bại.</h2>
+            }
+        }
+        else
+        {
+            <h2 class="title_confirmation mb-4">Đặt hàng thành công. Bạn vui lòng chờ email hoặc điện thoại xác nhận từ cửa hàng. Trân trọng cảm ơn!</h2>
+        }
+
+    </div>
+</section>
+<!--================End Order Details Area =================-->
+@if (Model != null)
+{
+    <div class="container">
+        <h3 class="mb-4" style="font-weight: bold">Sản phẩm tương tự</h3>
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <!-- single product -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="single-product card shadow">
+                        <div class="card-body" style="width: 250px; height: 250px;">
+                            <img class="img-fluid" src="@(item.ProductPhotoes.FirstOrDefault() == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.ProductPhotoes.FirstOrDefault().Photo)) " alt="" style="width: 100%; height: 100%;">
+                            @if (item.DiscountPercent != 0)
+                            {
+                                <div class="ribbon-wrapper ribbon-lg">
+                                    <div class="ribbon text-lg text-white" style="background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);">
+                                        Giảm @(item.DiscountPercent)%
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="product-details">
+                                <h6 style="text-transform: none;" class="mb-0">
+                                    @item.ProductName
+                                </h6>
+                                <div style="font-size: 16px;" class="review_box">
+                                    <ul class="list pl-0">
+                                        @for (int i = 0; i < (int)item.ScoreRating; i++)
+                                        {
+                                            <li><a href="#!"><i class="fa fa-star"></i></a></li>
+                                        }
+                                        @{
+                                            var count = 0;
+                                            var odd = item.ScoreRating - (int)item.ScoreRating;
+                                            if (odd >= 0.8)
+                                            {
+                                                count = 1;
+                                                <li><a href="#!"><i class="fa fa-star"></i>@odd</a></li>
+                                            }
+                                            else
+                                            {
+                                                if (odd >= 0.3)
+                                                {
+                                                    count = 1;
+                                                    <li style="width: 11px;"><a href="#!"><i class="fa fa-star-half"></i></a></li>
+                                                }
+                                            }
+                                        }
+                                        @for (int i = 0; i < 5 - item.ScoreRating - count; i++)
+                                        {
+                                            <li><a href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                        }
+                                    </ul>
+                                </div>
+                                <div class="price">
+                                    <h6 style="text-transform: none;">Giá: @String.Format("{0:0,0}", ((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))</h6>
+                                    @if (item.DiscountPercent != 0)
+                                    {
+                                        <h6 class="l-through">@String.Format("{0:0,0}", item.UnitSellPrice)</h6>
+                                    }
+                                </div>
+                                <div class="prd-bottom">
+
+                                    <a onclick="AddToShoppingCart('@item.ProductID', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.SizeID)', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.ColorID)')" class="social-info">
+                                        <span class="ti-bag" style="background: #222222;"></span>
+                                        <p class="hover-text">Đặt hàng</p>
+                                    </a>
+                                    <a href="#!" class="social-info" onclick="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ item.ProductID +"')" : "FavouriteProduct('"+ item.ProductID +"')")">
+                                        <span id="favourite-@item.ProductID" class="lnr lnr-heart" style="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")"></span>
+                                        <p class="hover-text">Yêu thích</p>
+                                    </a>
+                                    <a href="@Url.Action("chi-tiet-san-pham","Product", new { id = item.ProductID })" class="social-info">
+                                        <span class="lnr lnr-move" style="background: #222222;"></span>
+                                        <p class="hover-text">Chi tiết</p>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+@section scripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+    <script>
+        function AddToShoppingCart(productid, sizeid, colorid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("them-vao-gio-hang","ShoppingCart")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid, quantity: 1 }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function UnfavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("huy-yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+        function FavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+    </script>
+}

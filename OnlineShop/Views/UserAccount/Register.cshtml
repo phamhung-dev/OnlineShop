@@ -1,0 +1,86 @@
+﻿@using CaptchaMvc.HtmlHelpers
+@{
+    ViewBag.Title = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Đăng ký</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Đăng ký</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<!--================Register Area =================-->
+<section class="checkout_area section_gap">
+    <div class="container">
+        <div class="billing_details">
+            <div class="row">
+                <div class="col-lg-12 card shadow pt-4">
+                    <h2 class="mb-4">Đăng ký tài khoản</h2>
+                    <form id="form-register" class="row contact_form" method="post" action="@Url.Action("dang-ky", "UserAccount")" onsubmit="return false;">
+                        <div class="col-md-6 form-group p_star">
+                            <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Họ" required maxlength="50">
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Tên" required maxlength="50">
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input type="text" class="form-control" id="phone" name="phone" placeholder="Điện thoại" required maxlength="10">
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Địa chỉ" required maxlength="300">
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required maxlength="254">
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                        </div>
+                        <div class="col-md-6 form-group p_star">
+                            <input type="password" class="form-control" id="retypepassword" name="retypepassword" placeholder="Nhập lại mật khẩu" required>
+                        </div>
+                        <div class="col-md-12 form-group @("Đăng ký tài khoản thành công.".Equals(ViewBag.Notification) ? "text-success" : "text-danger") mb-3">
+                            @ViewBag.Notification
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <div class="creat_account">
+                                <input type="checkbox" id="agreeterms" onchange="AgreeTerms()">
+                                <label for="agreeterms">Tôi đồng ý với các </label>
+                                <a href="#" class="text-danger">chính sách</a>
+                            </div>
+                        </div>
+                        <div class="col-md-12 form-group mb-0">
+                            @Html.MathCaptcha("Đổi lại", "Câu trả lời")
+                        </div>
+                        <div class="col-md-12 form-group text-danger mb-3">
+                            @ViewBag.ErrorMessage
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <button id="register" style="line-height: 38px; cursor: not-allowed" class="primary-btn mt-0 text-white" type="submit">Đăng ký</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Register Area =================-->
+<script>
+    $(function () {
+        document.getElementById("CaptchaInputText").classList.add("form-control", "mt-2");
+        document.getElementById("CaptchaInputText").style.width = "200px";
+        document.getElementById("CaptchaImage").classList.add("mb-2");
+    });
+    function AgreeTerms() {
+        document.getElementById("agreeterms").checked == true ? document.getElementById("form-register").setAttribute("onsubmit", "return true;") : document.getElementById("form-register").setAttribute("onsubmit", "return false;");
+        document.getElementById("agreeterms").checked == true ? document.getElementById("register").style.cursor = "pointer" : document.getElementById("register").style.cursor = "not-allowed";
+    }
+</script>

@@ -1,0 +1,491 @@
+﻿
+@{
+    ViewBag.Title = "Trang chủ quản lý";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+    List<Model.EF.ProductBestSeller> ListProductBestSeller = ViewBag.ListProductBestSeller as List<Model.EF.ProductBestSeller>;
+}
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+}
+<section class="content mt-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@ViewBag.NewOrder</h3>
+
+                        <p>Đơn hàng chưa duyệt</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+                    <a href="@Url.Action("danh-sach-phieu-dat-hang","SellProduct")" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>
+                            <span class="description-percentage">
+                                @if (ViewBag.RevenueRate < 0)
+                                {<i class="fas fa-caret-down"></i> }
+                                else
+                                { <i class="fas fa-caret-up"></i>}  @ViewBag.RevenueRate<sup style="font-size: 20px">%</sup>
+                            </span>
+                        </h3>
+
+                        <p>Doanh thu tháng này</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-stats-bars"></i>
+                    </div>
+                    <a href="#revenue" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@ViewBag.UserAccount</h3>
+
+                        <p>Khách hàng</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+                    <a href="@Url.Action("danh-sach-tai-khoan-khach-hang","Account")" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>@ViewBag.Product</h3>
+
+                        <p>Sản phẩm</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-cube"></i>
+                    </div>
+                    <a href="@Url.Action("danh-sach-san-pham","Shop")" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+
+        <div id="revenue" class="row">
+            <div class="col-md-12">
+                <div class="card card-outline card-olive">
+                    <div class="card-header">
+                        <h5 class="card-title">Báo cáo doanh thu hàng tháng</h5>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p class="text-center">
+                                    <strong id="time">Thời gian: @ViewBag.FirstTime đến</strong>
+                                </p>
+
+                                <div class="chart">
+                                    <!-- Sales Chart Canvas -->
+                                    <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                </div>
+                                <!-- /.chart-responsive -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-md-4">
+                                <p class="text-center">
+                                    <strong>Sản phẩm</strong>
+                                </p>
+
+                                <div class="progress-group">
+                                    <span class="progress-text">Tồn kho</span>
+                                    <span class="float-right"><b>@ViewBag.TotalProductInventory</b>/@ViewBag.TotalProduct</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-danger" style="width: @ViewBag.InventoryRate%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- /.progress-group -->
+                                <div class="progress-group">
+                                    <span class="progress-text">Đã bán</span>
+                                    <span class="float-right"><b>@ViewBag.TotalProductSold</b>/@ViewBag.TotalProduct</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-success" style="width: @ViewBag.SoldRate%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.col -->
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- ./card-body -->
+                    <div class="card-footer">
+                        <div class="row">
+                            <!-- /.col -->
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                    <span class="description-text text-danger">Đơn hàng đã hủy</span>
+                                    <h5 class="description-header">@ViewBag.InvoiceCanceled</h5>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                    <span class="description-text text-warning">Đơn hàng đang giao</span>
+                                    <h5 class="description-header">@ViewBag.InvoiceDelivering</h5>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                    <span class="description-text text-success">Đơn hàng hoàn thành</span>
+                                    <h5 class="description-header">@ViewBag.InvoiceSucceeded</h5>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                            <!-- /.col -->
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block">
+                                    <span class="description-text text-primary">Tổng doanh thu năm</span>
+                                    <h5 class="description-header">@String.Format("{0:0,0}", ViewBag.TotalRevenueYear)</h5>
+                                </div>
+                                <!-- /.description-block -->
+                            </div>
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.card-footer -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card card-outline card-olive">
+                    <div class="card-header">
+                        <h3 class="card-title">Doanh thu ngày</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row form-group">
+                            <div class="col-md-2"><label>Chọn ngày:</label></div>
+                            <div class="col-md-4"><input id="chooseDate" type="date" class="form-control" /></div>
+                        </div>
+                        <table id="myTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Tên</th>
+                                    <th>Giá bán</th>
+                                    <th>Số lượng</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Tên</th>
+                                    <th>Giá bán</th>
+                                    <th>Số lượng</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <div class="col-md-5">
+                <!-- PRODUCT LIST -->
+                <div class="card card-outline card-olive">
+                    <div class="card-header">
+                        <h3 class="card-title">Sản phẩm bán chạy</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                            <li class="item">
+                                <div class="product-img">
+                                    <img src="data:image/png;base64, @ListProductBestSeller[0].Photo" alt="Product Image" class="img-size-50">
+                                </div>
+                                <div class="product-info">
+                                    <a href="javascript:void(0)" class="product-title">
+                                        @ListProductBestSeller[0].ProductName
+                                        <span class="badge badge-warning float-right">@String.Format("{0:0,0}", ListProductBestSeller[0].UnitSellPrice)</span>
+                                    </a>
+                                    <span class="product-description">
+                                        @ListProductBestSeller[0].ProductID - @ListProductBestSeller[0].SupplierName - @ListProductBestSeller[0].Gender - Số lượng đã bán: @ListProductBestSeller[0].Quantity
+                                    </span>
+                                </div>
+                            </li>
+                            <!-- /.item -->
+                            @if (ListProductBestSeller.Count() > 1)
+                            {
+                                <li class="item">
+                                    <div class="product-img">
+                                        <img src="data:image/png;base64, @ListProductBestSeller[1].Photo" alt="Product Image" class="img-size-50">
+                                    </div>
+                                    <div class="product-info">
+                                        <a href="javascript:void(0)" class="product-title">
+                                            @ListProductBestSeller[1].ProductName
+                                            <span class="badge badge-info float-right">@String.Format("{0:0,0}", ListProductBestSeller[1].UnitSellPrice)</span>
+                                        </a>
+                                        <span class="product-description">
+                                            @ListProductBestSeller[1].ProductID - @ListProductBestSeller[1].SupplierName - @ListProductBestSeller[1].Gender - Số lượng đã bán: @ListProductBestSeller[1].Quantity
+                                        </span>
+                                    </div>
+                                </li>
+                                <!-- /.item -->
+                            }
+                            @if (ListProductBestSeller.Count() > 2)
+                            {
+                                <li class="item">
+                                    <div class="product-img">
+                                        <img src="data:image/png;base64, @ListProductBestSeller[2].Photo" alt="Product Image" class="img-size-50">
+                                    </div>
+                                    <div class="product-info">
+                                        <a href="javascript:void(0)" class="product-title">
+                                            @ListProductBestSeller[2].ProductName
+                                            <span class="badge badge-danger float-right">@String.Format("{0:0,0}", ListProductBestSeller[2].UnitSellPrice)</span>
+                                        </a>
+                                        <span class="product-description">
+                                            @ListProductBestSeller[2].ProductID - @ListProductBestSeller[2].SupplierName - @ListProductBestSeller[2].Gender - Số lượng đã bán: @ListProductBestSeller[2].Quantity
+                                        </span>
+                                    </div>
+                                </li>
+                                <!-- /.item -->
+                            }
+                            @if (ListProductBestSeller.Count() > 3)
+                            {
+                                <li class="item">
+                                    <div class="product-img">
+                                        <img src="data:image/png;base64, @ListProductBestSeller[3].Photo" alt="Product Image" class="img-size-50">
+                                    </div>
+                                    <div class="product-info">
+                                        <a href="javascript:void(0)" class="product-title">
+                                            @ListProductBestSeller[3].ProductName
+                                            <span class="badge badge-success float-right">@String.Format("{0:0,0}", ListProductBestSeller[3].UnitSellPrice)</span>
+                                        </a>
+                                        <span class="product-description">
+                                            @ListProductBestSeller[3].ProductID - @ListProductBestSeller[3].SupplierName - @ListProductBestSeller[3].Gender - Số lượng đã bán: @ListProductBestSeller[3].Quantity
+                                        </span>
+                                    </div>
+                                </li>
+                                <!-- /.item -->
+                            }
+                        </ul>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+}
+
+@section ChartScripts
+{
+    <!-- ChartJS -->
+    <script src="~/Asset/Manager/plugins/chart.js/Chart.min.js"></script>
+    <script>
+        $(function () {
+            // Sales graph chart
+
+            n = new Date();
+            y = n.getFullYear();
+            m = n.getMonth() + 1;
+            d = n.getDate();
+            document.getElementById("time").innerText += " " + (d < 10 ? "0" + d : d) + "-" + (m < 10 ? "0" + m : m) + "-" + y;
+            var salesGraphChartCanvas = $('#line-chart').get(0).getContext('2d')
+            // $('#revenue-chart').get(0).getContext('2d');
+
+            var salesGraphChartData = {
+                labels: @Html.Raw(Json.Encode(ViewBag.ListLabels)),
+                datasets: [
+                    {
+                        label: 'VNĐ',
+                        fill: false,
+                        borderWidth: 2,
+                        lineTension: 0,
+                        spanGaps: true,
+                        borderColor: '#17a2b8',
+                        pointRadius: 3,
+                        pointHoverRadius: 7,
+                        pointColor: '#17a2b8',
+                        pointBackgroundColor: '#17a2b8',
+                        data: @Html.Raw(Json.Encode(ViewBag.ListData))
+                    }
+                ]
+            }
+
+            var salesGraphChartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            fontColor: '#17a2b8'
+                        },
+                        gridLines: {
+                            display: false,
+                            color: '#17a2b8',
+                            drawBorder: false
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 2000000,
+                            fontColor: '#17a2b8'
+                        },
+                        gridLines: {
+                            display: true,
+                            color: '#17a2b8',
+                            drawBorder: false
+                        }
+                    }]
+                }
+            }
+
+            // This will get the first returned node in the jQuery collection.
+            // eslint-disable-next-line no-unused-vars
+            var salesGraphChart = new Chart(salesGraphChartCanvas, { // lgtm[js/unused-local-variable]
+                type: 'line',
+                data: salesGraphChartData,
+                options: salesGraphChartOptions
+            });
+            $('#chooseDate').val(new Date().toDateInputValue());
+            var date = ChangeFormateDate(document.getElementById("chooseDate").value.replace(/^\s+|\s+$/gm, '').toString().replaceAll('-', '/'))
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/lay-doanh-thu-ngay",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ date: date }),
+                success: OnSuccess,
+            });
+        });
+        function OnSuccess(result) {
+            $('#myTable').DataTable({
+                data: result,
+                columns:
+                    [{ 'data': 'ProductID' },
+                    { 'data': 'ProductName' },
+                    { 'data': 'UnitSellPrice' },
+                    { 'data': 'Quantity' },
+                    { 'data': 'Revenue' }],
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In", "title": "Doanh thu ngày" },
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+            document.getElementById("chooseDate").onchange = function () { ChangeDate(); };
+        };
+        Date.prototype.toDateInputValue = (function () {
+            var local = new Date(this);
+            local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+            return local.toJSON().slice(0, 10);
+        });
+        function ChangeDate() {
+            var date = ChangeFormateDate(document.getElementById("chooseDate").value.replace(/^\s+|\s+$/gm, '').toString().replaceAll('-', '/'))
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/lay-doanh-thu-ngay",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ date: date }),
+                success: function (result) {
+                    var table = $('#myTable').DataTable();
+                    table.clear();
+                    table.rows.add(result);
+                    table.draw();
+                },
+            });
+        }
+        function ChangeFormateDate(oldDate) {
+            return oldDate.toString().split("/").reverse().join("/");
+        }
+    </script>
+}
+

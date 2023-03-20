@@ -1,0 +1,366 @@
+﻿
+@{
+    ViewBag.Title = "Thông tin cửa hàng";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+    Model.EF.Contact contact = ViewBag.Contact as Model.EF.Contact;
+    List<Model.EF.Slide> listSlide = ViewBag.ListSlide as List<Model.EF.Slide>;
+}
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<div class="card card-outline card-olive">
+    <div class="card-header p-2">
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a class="nav-link active ml-3" href="#slide" data-toggle="tab">Slide</a></li>
+            <li class="nav-item"><a class="nav-link" href="#contact" data-toggle="tab">Liên hệ</a></li>
+        </ul>
+    </div><!-- /.card-header -->
+    <div class="card-body">
+        <div class="tab-content">
+            <div class="active tab-pane" id="slide">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button id="btnUpload" class="input-group-text"><i class="fas fa-plus"></i> Thêm slide</button>
+                                </div>
+                                <input id="link-image" type="text" class="form-control" placeholder="Không có tệp nào được chọn" readonly />
+                                <input name="fileUpload" id="fileUpload" accept="images/*" type="file" hidden class="form-control"/>
+                                <div class="input-group-append">
+                                    <button class="input-group-text" id="btnClose" style="display: none;"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="input-group-text" id="btnSave" style="display: none;"><i class="fas fa-save"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div id="list-slide" class="row">
+                @foreach (var item in listSlide)
+                {
+                    <div class="col-sm-4" id="slide-@item.SlideID">
+                        <div class="card">
+                            <div class="card-header">
+                                @if (item.Status == false)
+                                {
+                                    <p id="pStatus-@item.SlideID">Đang ẩn</p>
+                                }
+                                else
+                                {
+                                    <p id="pStatus-@item.SlideID">Vị trí xuất hiện: @item.PositionAppear</p>
+                                }
+                            </div>
+                            <div class="card-body">
+                                <img style="height: 180px; width: 100%;" src="data:image/png;base64, @Convert.ToBase64String(item.Photo)" />
+                            </div>
+                            <div class="card-footer" id="card-footer-@item.SlideID">
+                                <a class="btn btn-danger float-right" onclick="DeleteSlide(@item.SlideID)"><i class="fas fa-trash-alt"></i> Xoá</a>
+                                @if (item.Status == false)
+                                {
+                                    <a id="display-@item.SlideID" class="btn btn-success mr-2 float-right" data-toggle="modal" data-target="#modal-sm" onclick="GetSlideID(@item.SlideID)"><i class="fas fa-eye"></i> Hiển thị</a>
+                                }
+                                else
+                                {
+                                    <a id="change-@item.SlideID" class="btn btn-primary mr-2 float-right" data-toggle="modal" data-target="#modal-sm" onclick="GetSlideID(@item.SlideID)"><i class="fas fa-edit"></i> Thay đổi</a>
+                                    <a id="hide-@item.SlideID" class="btn btn-success mr-2 float-right" onclick="ChangeStatusSlide(1,@item.SlideID)"><i class="fas fa-eye-slash"></i> Ẩn</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            </div>
+            <!-- /.tab-pane -->
+
+            <div class="tab-pane" id="contact">
+                <strong><i class="fas fa-location-arrow mr-1"></i> Địa chỉ</strong>
+                <p class="text-muted">
+                    <label id="labelAddress" style="font-weight: normal">@contact.Address</label>&nbsp;&nbsp;&nbsp;&nbsp;<a id="aAddress" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(Address.id, aAddress.id)"><i class="fas fa-edit"></i></a>
+                </p>
+                <div id="Address" class="row">
+                </div>
+                <strong><i class="fas fa-map-marker-alt mr-1"></i>Vị trí trên google map</strong>
+                &nbsp;&nbsp;&nbsp;&nbsp;<a id="aLocationOnGoogleMap" class="note-btn-primary " style="cursor: pointer" onclick="InputAppear(LocationOnGoogleMap.id, aLocationOnGoogleMap.id)"><i class="fas fa-edit"></i></a>
+                @*                <p class="text-muted">
+            <label id="labelLocationOnGoogleMap" style="font-weight: normal; word-break: break-word; max-width: 1200px;">@contact.LocationOnGoogleMap</label>&nbsp;&nbsp;&nbsp;&nbsp;<a id="aLocationOnGoogleMap" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(LocationOnGoogleMap.id, aLocationOnGoogleMap.id)"><i class="fas fa-edit"></i></a>
+        </p>*@
+                <p class="mt-3 text-muted">
+                    <div id="pLocationOnGoogleMap" class="card-body shadow">
+                        @Html.Raw(contact.LocationOnGoogleMap)
+                    </div>
+                </p>
+                <div id="LocationOnGoogleMap" class="row">
+                </div>
+                <hr>
+
+                <strong><i class="fas fa-phone mr-1"></i> Điện thoại</strong>
+                <p class="text-muted">
+                    <a id="txtPhone" style="cursor: pointer" href="tel:@contact.Phone">@contact.Phone</a> &nbsp;&nbsp;&nbsp;&nbsp;<a id="aPhone" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(Phone.id, aPhone.id)"><i class="fas fa-edit"></i></a>
+                </p>
+                <div id="Phone" class="row">
+                </div>
+                <hr>
+
+                <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+                <p class="text-muted">
+                    <a id="txtEmail" style="cursor: pointer" href="mailto:@contact.Email">@contact.Email</a> &nbsp;&nbsp;&nbsp;&nbsp;<a id="aEmail" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(Email.id, aEmail.id)"><i class="fas fa-edit"></i></a>
+                </p>
+                <div id="Email" class="row">
+                </div>
+                <hr>
+
+                <strong style="color: #4267B2;"><i class="fab fa-facebook"></i> Liên kết Facebook</strong>
+                <p class="text-muted">
+                    <a id="txtFacebookLink" href="@contact.FacebookLink" target="_blank">
+                        @contact.FacebookLink &nbsp;&nbsp;&nbsp;&nbsp;<a id="aFacebookLink" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(FacebookLink.id, aFacebookLink.id)"><i class="fas fa-edit"></i></a>
+                    </a>
+                </p>
+                <div id="FacebookLink" class="row">
+                </div>
+                <hr>
+
+                <strong style="color: #FD1D1D;"><i class="fab fa-instagram mr-1" style=" background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); -webkit-background-clip: text; /* Also define standard property for compatibility */ background-clip: text; -webkit-text-fill-color: transparent;"></i> Liên kết Instagram</strong>
+                <p class="text-muted">
+                    <a id="txtInstagramLink" href="@contact.InstagramLink" target="_blank">
+                        @contact.InstagramLink &nbsp;&nbsp;&nbsp;&nbsp;<a id="aInstagramLink" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(InstagramLink.id, aInstagramLink.id)"><i class="fas fa-edit"></i></a>
+                    </a>
+                </p>
+                <div id="InstagramLink" class="row">
+                </div>
+                <hr>
+
+                <strong style="color: #1DA1F2;"><i class="fab fa-twitter mr-1"></i> Liên kết Twitter</strong>
+                <p class="text-muted">
+                    <a id="txtTwitterLink" href="@contact.TwitterLink" target="_blank">
+                        @contact.TwitterLink &nbsp;&nbsp;&nbsp;&nbsp;<a id="aTwitterLink" class="note-btn-primary" style="cursor: pointer" onclick="InputAppear(TwitterLink.id, aTwitterLink.id)"><i class="fas fa-edit"></i></a>
+                    </a>
+                </p>
+                <div id="TwitterLink" class="row">
+                </div>
+                <hr>
+            </div>
+            <!-- /.tab-pane -->
+        </div>
+        <!-- /.tab-content -->
+    </div><!-- /.card-body -->
+</div>
+<div class="modal fade" id="modal-sm">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 class="modal-title">Thay đổi vị trí</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="input-Position" type="number" class="form-control" placeholder="Nhập vị trí" />
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="ChangePositionAppear()">Lưu</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+@section DataTablesScripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+    <script>
+        function b64encode (d) {
+            return btoa(String.fromCharCode.apply(d, d)).replace(/.{76}(?=.)/g, '$&\n');
+        };
+        $(function () {
+            $('#btnUpload').click(function () {
+                $('#fileUpload').trigger('click');
+            });
+        });
+
+        $('#fileUpload').change(function () {
+            $('#link-image').val($('#fileUpload').val().replace(/C:\\fakepath\\/i, ''));
+            $('#btnSave').css("display", "block");
+            $('#btnClose').css("display", "block");
+        });
+        $('#btnClose').click(function () {
+            document.getElementById("fileUpload").value = null;
+            $('#link-image').val(null);
+            $('#btnSave').css("display", "none");
+            $('#btnClose').css("display", "none");
+        });
+        $('#btnSave').click(function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $('#fileUpload').get(0);
+                var files = fileUpload.files;
+                var formData = new FormData();
+                formData.append('file', files[0]);
+                $.ajax(
+                    {
+                        type: 'POST',
+                        url: '/admin/quan-ly/slide/them-slide',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                var slide = '<div class="col-sm-4" id="slide-' + result.slide.SlideID + '"><div class="card"><div class="card-header">' + (result.slide.Status == false ? '<p id="pStatus-' + result.slide.SlideID + '">Đang ẩn</p>' : '<p id="pStatus-' + result.slide.SlideID + '">Vị trí xuất hiện: ' + result.slide.PositionAppear + '</p>') +
+                                    '</div><div class="card-body"><img style="height: 180px; width: 100%;" src="data:image/png;base64, ' + result.slide.Photo + '" />' +
+                                    '</div > <div class="card-footer" id="card-footer-' + result.slide.SlideID + '"><a class="btn btn-danger float-right" onclick="DeleteSlide(' + result.slide.SlideID + ')"><i class="fas fa-trash-alt"></i> Xoá</a>' + (result.slide.Status == false ? '<a id="display-' + result.slide.SlideID + '" class="btn btn-success mr-2 float-right" data-toggle="modal" data-target="#modal-sm" onclick="GetSlideID(' + result.slide.SlideID + ')"><i class="fas fa-eye"></i> Hiển thị</a>' : '<a id="change-' + result.slide.SlideID + '" class="btn btn-primary mr-2 float-right" data-toggle="modal" data-target="#modal-sm" onclick="GetSlideID(' + result.slide.SlideID + ')"><i class="fas fa-edit"></i> Thay đổi</a>' + '<a id="hide-' + result.slide.SlideID + '" class="btn btn-success mr-2 float-right" onclick="ChangeStatusSlide(1,' + result.slide.SlideID + ')"><i class="fas fa-eye-slash"></i> Ẩn</a>') + '</div></div></div>';
+                                document.getElementById("list-slide").innerHTML += slide;
+                                $('#btnClose').trigger('click');
+                                toastr.success(result.message);
+                            }
+                            else {
+                                toastr.error(result.message);
+                            }
+                        }
+                    });
+            }
+        });
+    </script>
+}
+<script>
+
+    function DeleteSlide(id) {
+        $.ajax({
+            type: "POST",
+            url: "/admin/quan-ly/slide/xoa-slide",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    document.getElementById("slide-" + id).remove();
+                    toastr.success(result.message);
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    var slideID = null;
+    function GetSlideID(id) {
+        slideID = id;
+        document.getElementById("input-Position").value = null;
+        $("#modal-sm").modal("show");
+    }
+
+    function ChangePositionAppear() {
+        var input = document.getElementById("input-Position").value;
+        $.ajax({
+            type: "POST",
+            url: "/admin/quan-ly/slide/thay-doi-vi-tri-xuat-hien",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: slideID, position: input }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    document.getElementById("pStatus-" + slideID).innerText = "Vị trí xuất hiện: " + input;
+                    if (document.getElementById("display-" + slideID) != null) {
+                        document.getElementById("display-" + slideID).remove();
+                        document.getElementById("card-footer-" + slideID).innerHTML += '<a id="change-' + slideID + '" class="btn btn-primary mr-2 float-right" onclick="GetSlideID(' + slideID + ')"><i class="fas fa-edit"></i> Thay đổi</a> <a id="hide-' + slideID + '" class="btn btn-success mr-2 float-right" onclick="ChangeStatusSlide(1,' + slideID + ')"><i class="fas fa-eye-slash"></i> Ẩn</a>';
+                    }
+                    toastr.success(result.message);
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+
+    function ChangeStatusSlide(status, id) {
+        $.ajax({
+            type: "POST",
+            url: "/admin/quan-ly/slide/thay-doi-trang-thai",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                if (result.success) {
+                    if (status == 0) {
+                        document.getElementById("pStatus-" + id).innerText = "Vị trí xuất hiện: ";
+                        document.getElementById("display-" + id).remove();
+                        document.getElementById("card-footer-" + id).innerHTML += '<a id="change-' + id + '" class="btn btn-primary mr-2 float-right" onclick="GetSlideID(' + id + ')"><i class="fas fa-edit"></i> Thay đổi</a> <a id="hide-' + id + '" class="btn btn-success mr-2 float-right" onclick="ChangeStatusSlide(1,' + id + ')"><i class="fas fa-eye-slash"></i> Ẩn</a>';
+                    }
+                    else {
+                        document.getElementById("pStatus-" + id).innerText = "Đang ẩn";
+                        document.getElementById("hide-" + id).remove();
+                        document.getElementById("change-" + id).remove();
+                        document.getElementById("card-footer-" + id).innerHTML += '<a id="display-' + id + '" class="btn btn-success mr-2 float-right" data-toggle="modal" data-target="#modal-sm" onclick="GetSlideID('+ id +')"><i class="fas fa-eye"></i> Hiển thị</a>';
+                    }
+                }
+            }
+        });
+    }
+
+    function UpdateContact(idInfo) {
+        var input = document.getElementById("input" + idInfo.id).value;
+        $.ajax({
+            type: "POST",
+            url: "/admin/quan-ly/lien-he/cap-nhat-thong-tin",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ idInfo: idInfo.id, input: input }),
+            async: true,
+            processData: false,
+            cache: false,
+            success: function (result) {
+                const reg = /^((\+)33|0)[1-9](\d{2}){4}$/;
+                if (result.success) {
+                    if (document.getElementById("p" + idInfo.id) == null) {
+                        if (document.getElementById("label" + idInfo.id) == null) {
+                            input.match(reg) ? document.getElementById("txt" + idInfo.id).href = "tel:" + input : document.getElementById("txt" + idInfo.id).href = "mailto:" + input;
+                            document.getElementById("txt" + idInfo.id).innerText = input;
+                        }
+                        else {
+                            document.getElementById("label" + idInfo.id).innerText = input;
+                        }
+                    }
+                    else {
+                        document.getElementById("p" + idInfo.id).innerHTML = input;
+                    }
+                    document.getElementById("a" + idInfo.id).style.display = "";
+                    document.getElementById("input" + idInfo.id).remove();
+                    document.getElementById("save" + idInfo.id).remove();
+                    document.getElementById("cancel" + idInfo.id).remove();
+                    toastr.success(result.message);
+                }
+                else {
+                    toastr.error(result.message);
+                }
+            }
+        });
+    }
+    function CancelInput(divid) {
+        document.getElementById("a" + divid.id).style.display = "";
+        document.getElementById("input" + divid.id).remove();
+        document.getElementById("save" + divid.id).remove();
+        document.getElementById("cancel" + divid.id).remove();
+    }
+    function InputAppear(divid, aid) {
+        document.getElementById(divid).innerHTML = '<input id="input' + divid + '" type="text" class="form-control col-lg-8 mr-2 mb-3" id="input-' + divid + '" /> <a id="save' + divid + '" class="btn btn-primary mb-3 mr-2" style="cursor: pointer" onclick="UpdateContact(' + divid + ')">Lưu</a> <a id="cancel' + divid + '" class="btn btn-danger mb-3" style="cursor: pointer" onclick="CancelInput(' + divid + ')">Hủy</a>';
+        document.getElementById(aid).style.display = "none";
+    }
+
+</script>
+

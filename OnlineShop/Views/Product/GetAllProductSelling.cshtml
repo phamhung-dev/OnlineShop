@@ -1,0 +1,442 @@
+﻿@model List<Model.EF.Product>
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<Model.EF.Supplier> ListSupplier = ViewBag.ListSupplier as List<Model.EF.Supplier>;
+    List<Model.EF.Age> ListAge = ViewBag.ListAge as List<Model.EF.Age>;
+}
+
+@section head
+{
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Danh sách sản phẩm</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="@Url.Action("trang-chu", "Main")">Trang chủ<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Sản phẩm<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Danh sách sản phẩm</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+
+<div class="container">
+    <div class="row">
+        <div class="col-xl-3 col-lg-4 col-md-5">
+            <div class="sidebar-filter">
+                <div class="top-filter-head">Lọc sản phẩm</div>
+                <div class="common-filter">
+                    <div class="head">Thương hiệu</div>
+                    <div>
+                        <ul>
+                            @{
+                                var countSupplier = 0;
+                                foreach (var item in ListSupplier)
+                                {
+                                    <li class="filter-list"><input onclick="Filter('@item.SupplierName', null, null)" class="pixel-radio" type="radio" id="@item.SupplierID" name="brand"><label for="@item.SupplierID">@item.SupplierName<span>(@item.Products.Where(x => x.Status == true).Count())</span></label></li>
+                                    countSupplier += item.Products.Where(x => x.Status == true).Count();
+                                }
+                                <li class="filter-list"><input onclick="Filter('all', null, null)" class="pixel-radio" type="radio" name="brand" checked><label>Tất cả<span>(@countSupplier)</span></label></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="common-filter">
+                    <div class="head">Độ tuổi</div>
+                    <div>
+                        <ul>
+                            @{
+                                var countAge = 0;
+                                foreach (var item in ListAge)
+                                {
+                                    <li class="filter-list"><input onclick="Filter(null, '@item.AgeName', null)" class="pixel-radio" type="radio" id="@item.AgeID" name="age"><label for="@item.AgeID">@item.AgeName<span>(@item.Products.Where(x => x.Status == true).Count())</span></label></li>
+                                    countAge += item.Products.Where(x => x.Status == true).Count();
+                                }
+                                <li class="filter-list"><input onclick="Filter(null, 'all', null)" class="pixel-radio" type="radio" name="age" checked><label>Tất cả<span>(@countAge)</span></label></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="common-filter">
+                    <div class="head">Giới tính</div>
+                    <div>
+                        <ul>
+                            <li class="filter-list"><input onclick="Filter(null, null, 'male')" class="pixel-radio" type="radio" name="gender"><label>Nam<span>(@Model.Where(x => x.Gender == true).Count())</span></label></li>
+                            <li class="filter-list"><input onclick="Filter(null, null, 'female')" class="pixel-radio" type="radio" name="gender"><label>Nữ<span>(@Model.Where(x => x.Gender == false).Count())</span></label></li>
+                            <li class="filter-list"><input onclick="Filter(null, null, 'all')" class="pixel-radio" type="radio" name="gender" checked><label>Tất cả<span>(@Model.Count())</span></label></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="common-filter">
+                    <div class="head">Giá sản phẩm</div>
+                    <div class="price-range-area">
+                        <div id="price-range"></div>
+                        <div class="value-wrapper d-flex">
+                            <div class="price">Giá:</div>
+                            <span></span>
+                            <div id="lower-value"></div>
+                            <div class="to">➝</div>
+                            <span></span>
+                            <div id="upper-value"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-9 col-lg-8 col-md-7">
+            <!-- Start Filter Bar -->
+            <div class="filter-bar d-flex flex-wrap align-items-center" style="height: 60px; margin-top: 50px;">
+                <div class="sorting">
+                    <select name="sort" id="sort">
+                        <option value="priceASC">Giá tăng</option>
+                        <option value="priceDESC">Giá giảm</option>
+                        <option value="date">Mới nhất</option>
+                        <option value="name">Tên A ➝ Z</option>
+                    </select>
+                </div>
+                <div class="sorting mr-auto" style="z-index: 11;">
+                    <select name="favourite" id="favourite">
+                        <option value="favourite">Đã yêu thích</option>
+                        <option value="all" selected>Tất cả</option>
+                    </select>
+                </div>
+                <div class="float-right">
+                    <div class="mt-2">
+                        <input id="input-search" type="search" class="form-control" placeholder="Tìm kiếm" onkeyup="SearchProduct()">
+                    </div>
+                </div>
+            </div>
+            <!-- End Filter Bar -->
+            <!-- Start Best Seller -->
+            <section class="lattest-product-area pb-40 category-list">
+                <div class="row results">
+                    @foreach (var item in Model)
+                    {
+                        <!-- single product -->
+                        <div class="item col-lg-4" data-search-name="@item.ProductName" data-sort-name="@item.ProductName" data-sort-price="@(((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))" data-sort-date="@item.CreateAt.ToString("dd/MM/yyyy HH:mm:ss")" data-filter-favourite="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "favourite" : "unfavourite")" data-filter-brand="@item.Supplier.SupplierName" data-filter-age="@item.Age.AgeName" data-filter-gender="@(item.Gender == true ? "male" : "female")" style="height: 450px;">
+                            <div class="single-product card shadow mt-3 mb-0">
+                                <div class="card-body" style="width: 250px; height: 250px;">
+                                    <img class="img-fluid" src="@(item.ProductPhotoes.FirstOrDefault() == null ? "../Asset/Manager/dist/img/prod-2.jpg" : "data:image/png;base64, " + Convert.ToBase64String(item.ProductPhotoes.FirstOrDefault().Photo)) " alt="" style="width: 100%; height: 100%;">
+                                    @if (item.DiscountPercent != 0)
+                                    {
+                                        <div class="ribbon-wrapper ribbon-lg">
+                                            <div class="ribbon text-lg text-white" style="background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%);">
+                                                Giảm @(item.DiscountPercent)%
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <div class="product-details">
+                                        <h6 style="text-transform: none;" class="mb-0">
+                                            @item.ProductName
+                                        </h6>
+                                        <div style="font-size: 16px;" class="review_box">
+                                            <ul class="list pl-0">
+                                                @for (int i = 0; i < (int)item.ScoreRating; i++)
+                                                {
+                                                    <li><a href="#!"><i class="fa fa-star"></i></a></li>
+                                                }
+                                                @{
+                                                    var count = 0;
+                                                    var odd = item.ScoreRating - (int)item.ScoreRating;
+                                                    if (odd >= 0.8)
+                                                    {
+                                                        count = 1;
+                                                        <li><a href="#!"><i class="fa fa-star"></i>@odd</a></li>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (odd >= 0.3)
+                                                        {
+                                                            count = 1;
+                                                            <li style="width: 11px;"><a href="#!"><i class="fa fa-star-half"></i></a></li>
+                                                        }
+                                                    }
+                                                }
+                                                @for (int i = 0; i < 5 - item.ScoreRating - count; i++)
+                                                {
+                                                    <li><a href="#!"><i class="fa fa-star" style="color: #e8f0f2;"></i></a></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                        <div class="price">
+                                            <h6 style="text-transform: none;">Giá: @String.Format("{0:0,0}", ((double)item.UnitSellPrice) * (1 - item.DiscountPercent / 100))</h6>
+                                            @if (item.DiscountPercent != 0)
+                                            {
+                                                <h6 class="l-through">@String.Format("{0:0,0}", item.UnitSellPrice)</h6>
+                                            }
+                                        </div>
+                                        <div class="prd-bottom">
+
+                                            <a onclick="AddToShoppingCart('@item.ProductID', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.SizeID)', '@(item.Stocks.FirstOrDefault(x => x.Quantity > 0)?.ColorID)')" class="social-info">
+                                                <span class="ti-bag" style="background: #222222;"></span>
+                                                <p class="hover-text">Đặt hàng</p>
+                                            </a>
+                                            <a href="#!" class="social-info" onclick="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "UnfavouriteProduct('"+ item.ProductID +"')" : "FavouriteProduct('"+ item.ProductID +"')")">
+                                                <span id="favourite-@item.ProductID" class="lnr lnr-heart" style="@(item.Favourites.Where(x => x.UserID == (Session["CustomerCurrent"] as Model.EF.UserAccount)?.UserID).Count() > 0 ? "background: linear-gradient(90deg, #ffba00 0%, #ff6c00 100%)" : "background: #222222;")"></span>
+                                                <p class="hover-text">Yêu thích</p>
+                                            </a>
+                                            <a href="@Url.Action("chi-tiet-san-pham","Product", new { id = item.ProductID })" class="social-info">
+                                                <span class="lnr lnr-move" style="background: #222222;"></span>
+                                                <p class="hover-text">Chi tiết</p>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+            <!-- End Best Seller -->
+            <!-- Start Filter Bar -->
+            <div class="text-center mb-4 mt-4">
+                <div id="show-more">
+                    <a href="#!" class="primary-btn" style="line-height:38px; border-radius: 0px;">Xem thêm</a>
+                </div>
+            </div>
+            <!-- End Filter Bar -->
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+    <script src="~/Asset/User/dist/js/vendor/tinysort.min.js"></script>
+    <script>
+        //
+        // Sort with TinySort http://tinysort.sjeiti.com/
+        $('div select#sort').on('change', function () {
+            var sortVal = $(this).val();
+            if (sortVal == 'date') {
+                tinysort('.item', {
+                    order: 'desc',
+                    data: 'sort-' + sortVal
+                });
+            }
+            else {
+                if (sortVal == 'priceASC') {
+                    tinysort('.item', {
+                        order: 'asc',
+                        data: 'sort-price'
+                    });
+                }
+                else {
+                    if (sortVal == 'priceDESC') {
+                        tinysort('.item', {
+                            order: 'desc',
+                            data: 'sort-price'
+                        });
+                    }
+                    else {
+                        tinysort('.item', {
+                            order: 'asc',
+                            data: 'sort-' + sortVal
+                        });
+                    }
+                }
+            }
+        });
+        var selectFavourite = 'all';
+        $('div select#favourite').on('change', function () {
+            if ('@HttpContext.Current.Session["CustomerCurrent"]' == '') {
+                window.location.href = "@Url.Action("dang-nhap", "UserAccount")";
+            }
+            selectFavourite = $(this).val();
+            Filter(brand, age, gender);
+        });
+
+        //filter handmade
+        var items = $('.results .item');
+        var amount;
+
+        var brand = "all";
+        var age = "all";
+        var gender = "all";
+
+        function Filter(ibrand, iage, igender) {
+            if (ibrand != null) {
+                brand = ibrand;
+            }
+            if (iage != null) {
+                age = iage;
+            }
+            if (igender != null) {
+                gender = igender;
+            }
+            if (brand == "all" && age == "all" && gender == "all") {
+                // show all items
+                items.removeClass('hidden').addClass('visible');
+            }
+            else {
+                // filter and show only items with selected values in data attr
+                items.addClass('hidden').removeClass('visible');
+                if (brand != "all" && age == "all" && gender == "all") {
+                    $('.item[data-filter-brand="' + brand + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand == "all" && age != "all" && gender == "all") {
+                    $('.item[data-filter-age="' + age + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand == "all" && age == "all" && gender != "all") {
+                    $('.item[data-filter-gender="' + gender + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand != "all" && age != "all" && gender == "all") {
+                    $('.item[data-filter-brand="' + brand + '"][data-filter-age="' + age + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand != "all" && age == "all" && gender != "all") {
+                    $('.item[data-filter-brand="' + brand + '"][data-filter-gender="' + gender + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand == "all" && age != "all" && gender != "all") {
+                    $('.item[data-filter-age="' + age + '"][data-filter-gender="' + gender + '"]').removeClass('hidden').addClass('visible');
+                } else if (brand != "all" && age != "all" && gender != "all") {
+                    $('.item[data-filter-brand="' + brand + '"][data-filter-age="' + age + '"][data-filter-gender="' + gender + '"]').removeClass('hidden').addClass('visible');
+                }
+            }
+            itemsVisible = $(".results .item.visible");
+            for (let i = 0; i < itemsVisible.length; i++) {
+                var price = parseInt(itemsVisible[i].getAttribute('data-sort-price'));
+                if (price < minPrice || price > maxPrice) {
+                    itemsVisible[i].classList.add("hidden");
+                    itemsVisible[i].classList.remove("visible");
+                }
+                if (selectFavourite == 'favourite') {
+                    if (itemsVisible[i].getAttribute('data-filter-favourite') != selectFavourite) {
+                        itemsVisible[i].classList.add("hidden");
+                        itemsVisible[i].classList.remove("visible");
+                    }
+                }
+            }
+            $("#show-more").show();
+        }
+
+        var minPrice = 0;
+        var maxPrice = 10000000;
+        $(function () {
+
+            if (document.getElementById("price-range")) {
+                var nonLinearSlider = document.getElementById('price-range');
+
+                noUiSlider.create(nonLinearSlider, {
+                    connect: true,
+                    behaviour: 'tap',
+                    start: [0, 10000000],
+                    range: {
+                        'min': [0],
+                        '10%': [100000, 500000],
+                        '50%': [5000000, 1000000],
+                        'max': [10000000]
+                    }
+                });
+                var nodes = [
+                    document.getElementById('lower-value'), // 0
+                    document.getElementById('upper-value')  // 1
+                ];
+
+                // Display the slider value and how far the handle moved
+                // from the left edge of the slider.
+                nonLinearSlider.noUiSlider.on('update', function (values, handle, unencoded, isTap, positions) {
+                    nodes[handle].innerHTML = parseInt(values[handle]).toLocaleString().replaceAll('.', ',');
+                    minPrice = parseInt(values[0]);
+                    maxPrice = parseInt(values[1]);
+                    Filter(brand, age, gender);
+                });
+            }
+
+        });
+
+        //
+        // load more button
+        amountItems = $(".results .item:not(.hidden)").size();
+        x = 6;
+        $(".results .item:not(.hidden)").hide();
+        $('.results .item:not(.hidden):lt(' + x + ')').show();
+        $('#show-more').on('click', function (e) {
+            e.preventDefault();
+            x = (x + 6 <= amountItems) ? x + 6 : amountItems;
+            $('.results .item:not(.hidden):lt(' + x + ')').show();
+            if (x + 6 >= amountItems) {
+                $(this).hide();
+            }
+        });
+
+        function SearchProduct() {
+            var input = document.getElementById("input-search").value;
+            Filter(brand, age, gender);
+            itemsVisible = $(".results .item.visible");
+            for (let i = 0; i < itemsVisible.length; i++) {
+                if (itemsVisible[i].getAttribute("data-search-name").toLowerCase().indexOf(input.toLowerCase()) === -1) {
+                    itemsVisible[i].classList.add("hidden");
+                    itemsVisible[i].classList.remove("visible");
+                }
+            }
+        }
+
+        function AddToShoppingCart(productid, sizeid, colorid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("them-vao-gio-hang","ShoppingCart")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid, sizeid: sizeid, colorid: colorid, quantity: 1 }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function UnfavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("huy-yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+        function FavouriteProduct(productid) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("yeu-thich-san-pham","Product")",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ productid: productid }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        window.location.href = result.url;
+                    }
+                }
+            });
+        }
+    </script>
+}

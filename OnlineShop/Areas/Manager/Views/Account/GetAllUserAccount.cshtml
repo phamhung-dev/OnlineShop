@@ -1,0 +1,366 @@
+﻿
+@model IEnumerable<Model.EF.UserAccount>
+@{
+    ViewBag.Title = "Danh sách tài khoản khách hàng";
+    Layout = "~/Areas/Manager/Views/Shared/_LayoutAdmin.cshtml";
+}
+@section head
+{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/Asset/Manager/plugins/toastr/toastr.min.css">
+}
+<div class="card card-outline card-olive">
+    <div class="card-header">
+        <h3 class="card-title">Danh sách tài khoản khách hàng</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="myTable" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Đang hoạt động</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="row-@item.UserID">
+                        <td>@item.UserID</td>
+                        <td>@item.FirstName@if(!string.IsNullOrEmpty(item.FirstName) && !string.IsNullOrEmpty(item.LastName)){<label>&nbsp;</label>}@item.LastName</td>
+                        <td><a id="email-row-@item.UserID" href="mailto:@item.Email">@item.Email</a></td>
+                        <td><a id="phone-row-@item.UserID" href="tel:@item.Phone">@item.Phone</a></td>
+                        <td>@item.Address</td>
+                        <td>@Html.CheckBoxFor(modelItem => item.Status, new { @id = "status-"+item.UserID, @onchange = "ChangeStatusUser('" + item.UserID + "')" })</td>
+                        <td>
+                            <a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetUserById('@item.UserID');"><i class="fas fa-eye"></i></a>
+                        </td>
+                     </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Đang hoạt động</th>
+                    <th>Hành động</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+<!-- /.modal -->
+
+<div class="modal fade" id="modal-lg">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content card-outline card-olive">
+            <div class="modal-header">
+                <h4 id="userid" class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--User Image-->
+                <div class="text-center">
+                    <img id="avatar" class="profile-user-img img-responsive img-circle" style="width: 200px; height: 200px;" alt="User profile picture" />
+                </div>
+                <!--FirstName-->
+                <div class="form-group">
+                    <label>Họ</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-id-card-alt" style="width:18px;"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Họ" id="firstname" required maxlength="50"/>
+                    </div>
+                </div>
+                <!--LastName-->
+                <div class="form-group">
+                    <label>Tên</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-id-card-alt" style="width:18px;"></i></span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Tên" id="lastname" required maxlength="50"/>
+                    </div>
+                </div>
+                <!-- Select Gender-->
+                <div class="form-group">
+                    <label>Giới tính</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-venus-mars" style="width:18px;"></i></span>
+                        </div>
+                        <select id="gender" class="form-control">
+                            <option value="true">Nam</option>
+                            <option value="false">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Birthday -->
+                <div class="form-group">
+                    <label>Ngày sinh</label>
+                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                        <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fas fa-calendar-day" style="width:18px;"></i></div>
+                        </div>
+                        <input id="birthday" type="text" class="form-control datetimepicker-input" placeholder="Ngày sinh" data-target="#reservationdate" onkeydown="return false" />
+                    </div>
+                </div>
+                <!--Email-->
+                <div class="form-group">
+                    <label>Email</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope" style="width:18px;"></i></span>
+                        </div>
+                        <input id="email" type="email" class="form-control" placeholder="Email" disabled />
+                    </div>
+                </div>
+                <!--Password-->
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key" style="width:18px;"></i></span>
+                        </div>
+                        <input id="password" type="text" class="form-control" placeholder="Mật khẩu" disabled />
+                    </div>
+                </div>
+                <!-- Phone -->
+                <div class="form-group">
+                    <label>Điện thoại</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-phone" style="width:18px;"></i></span>
+                        </div>
+                        <input id="phone" type="text" class="form-control" placeholder="Điện thoại" data-inputmask='"mask": "(999) 999-9999"' data-mask required/>
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <!--Address-->
+                <div class="form-group">
+                    <label>Địa chỉ</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-location-arrow" style="width:18px;"></i></span>
+                        </div>
+                        <input id="address" type="text" class="form-control" placeholder="Địa chỉ" required maxlength="300" />
+                    </div>
+                </div>
+                <!-- CreateAt dd/mm/yyyy -->
+                <div class="form-group">
+                    <label>Ngày tạo</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-calendar-check" style="width:18px;"></i></span>
+                        </div>
+                        <input id="createat" type="text" class="form-control" placeholder="Ngày tạo" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask disabled />
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <!-- Select Status-->
+                <div class="form-group">
+                    <label>Trạng thái</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-check" style="width:18px;"></i></span>
+                        </div>
+                        <select id="status" class="form-control">
+                            <option value="true">Đang hoạt động</option>
+                            <option value="false">Khóa</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- /.form group -->
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button id="updateUser" type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+@section DataTablesScripts
+{
+    <!-- DataTables  & Plugins -->
+    <script src="~/Asset/Manager/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/Asset/Manager/plugins/jszip/jszip.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/Asset/Manager/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/Asset/Manager/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <!-- InputMask -->
+    <script src="~/Asset/Manager/plugins/moment/moment.min.js"></script>
+    <script src="~/Asset/Manager/plugins/inputmask/jquery.inputmask.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="~/Asset/Manager/plugins/toastr/toastr.min.js"></script>
+
+    <!-- Page specific script -->
+    <script>
+        $(function () {
+            $('#myTable').DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "language": {
+                    "info": "Đang hiển thị trang _PAGE_/_PAGES_",
+                    "paginate": {
+                        "previous": "Trước",
+                        "next": "Kế tiếp"
+                    },
+                    "search": "Tìm kiếm",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "infoEmpty": "Không có mục nào để hiển thị",
+                    "infoFiltered": "(được lọc từ tổng số _MAX_ mục nhập)"
+                },
+                //"buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "buttons": [
+                    { "extend": "copy", "text": "Copy" },
+                    { "extend": "csv", "text": "CSV" },
+                    { "extend": "excel", "text": "Excel" },
+                    { "extend": "pdf", "text": "PDF" },
+                    { "extend": "print", "text": "In" },
+                    { "extend": "colvis", "text": "Hiển thị cột" }
+                ],
+                "paging": true,
+                "ordering": true,
+            }).buttons().container().appendTo('#myTable_wrapper .col-md-6:eq(0)');
+
+            //Money Euro
+            $('[data-mask]').inputmask()
+
+            //Date picker
+            $('#reservationdate').datetimepicker({
+                format: 'DD/MM/yyyy',
+            });
+        });
+
+        function ConvertTimestampToDate(ts) {
+            var date = new Date(parseInt(ts));
+            var day = date.getDate();
+            var month = date.getMonth() + 1;
+            var year = date.getFullYear();
+            return (day < 10 ? "0" + day : day) + "/" + (month < 10 ? "0" + month : month) + "/" + year;
+        }
+
+        function ChangeStatusUser(id) {
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/khach-hang/thay-doi-trang-thai-tai-khoan",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        document.getElementById('status-' + id).checked = result.status;
+                    }
+                }
+            });
+        }
+
+        function UpdateUser(id) {
+            var firstname = document.getElementById("firstname").value.replace(/^\s+|\s+$/gm, '');
+            var lastname = document.getElementById("lastname").value.replace(/^\s+|\s+$/gm, '');
+            var email = document.getElementById("email").value.replace(/^\s+|\s+$/gm, '');
+            var gender = document.getElementById("gender").value;
+            var birthday = document.getElementById("birthday").value.replace(/^\s+|\s+$/gm, '');
+            var phone = document.getElementById("phone").value.replace(/^\s+|\s+$/gm, '');
+            var address = document.getElementById("address").value.replace(/^\s+|\s+$/gm, '');
+            var status = document.getElementById("status").value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/quan-ly/khach-hang/cap-nhat-tai-khoan",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, firstname: firstname, lastname: lastname, gender: gender, birthday: birthday, phone: phone, address: address, status: status }),
+                async: true,
+                processData: false,
+                cache: false,
+                success: function (result) {
+                    if (result.success) {
+                        var rowHTML = '<tr id="row-' + id + '">' +
+                            '<td>' + id + '</td>' +
+                            '<td>' + firstname + (firstname != "" && lastname != "" ? " " : "") + lastname + '</td>' +
+                            '<td><a id="email-row-' + id + '" href="mailto:' + email + '">' + email + '</a></td>' +
+                            '<td><a id="phone-row-' + id + '" href="tel:' + phone.replace(/\D/g, '') + '">' + phone.replace(/\D/g, '') + '</a></td>' +
+                            '<td>' + address + '</td>' +
+                            '<td><input type = "checkbox" id = "status-' + id + '" onchange = "ChangeStatusUser(\'' + id + '\')" ' + (status == 'true' ? 'checked' : '') + ' /></td>' +
+                            '<td>' +
+                            '<a class="note-btn-primary" style="cursor: pointer" data-toggle="modal" data-target="#modal-lg" onclick="GetUserById(\'' + id + '\');"><i class="fas fa-eye"></i></a>' +
+                            '</td>' +
+                            '</tr>';
+                        var table = $('#myTable').DataTable();
+                        table.row('#row-' + id).remove().draw();
+                        table.rows.add($(rowHTML)).draw();
+                        toastr.success(result.message);
+                    }
+                    else {
+                        toastr.error(result.message);
+                    }
+                }
+            });
+        }
+        function b64encode(d) {
+            return btoa(String.fromCharCode.apply(d, d)).replace(/.{76}(?=.)/g, '$&\n');
+        };
+        function GetUserById(id) {
+            $.ajax({
+                type: "GET",
+                url: "/admin/quan-ly/khach-hang/xem-tai-khoan",
+                cache: false,
+                data: { id: id },
+                success: function (userAccount) {
+                    document.getElementById("userid").innerText = "Thông tin tài khoản - Mã KH: " + userAccount.UserID;
+                    document.getElementById("avatar").src = (userAccount.Avatar == null ? "../../../Asset/Manager/dist/img/user.png" : "data:image/png;base64, " + b64encode(userAccount.Avatar));
+                    document.getElementById("firstname").value = userAccount.FirstName;
+                    document.getElementById("lastname").value = userAccount.LastName;
+                    document.getElementById("gender").value = userAccount.Gender;
+                    document.getElementById("birthday").value = ConvertTimestampToDate(userAccount.Birthday.match(/\d+/)[0]);
+                    document.getElementById("email").value = userAccount.Email;
+                    document.getElementById("password").value = userAccount.Password;
+                    document.getElementById("phone").value = userAccount.Phone;
+                    document.getElementById("address").value = userAccount.Address;
+                    document.getElementById("createat").value = ConvertTimestampToDate(userAccount.CreateAt.match(/\d+/)[0]);
+                    document.getElementById("status").value = userAccount.Status;
+                    document.getElementById("updateUser").onclick = function () { UpdateUser(userAccount.UserID); };
+                }
+            });
+        }
+    </script>
+}
+
+
+
